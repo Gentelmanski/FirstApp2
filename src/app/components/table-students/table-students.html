@@ -1,0 +1,31 @@
+<h1>Student table</h1>
+
+<div *ngIf="isLoading">Загрузка...</div>
+<div *ngIf="error" style="color: red;">{{ error }}</div>
+
+<table *ngIf="!isLoading">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Surname</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (student of students; track student.id) {
+      <tr>
+        <td>{{ student.id }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ student.surname }}</td>
+        <td>
+          <button (click)="editStudent(student)" [disabled]="isLoading">Edit</button>
+          <button (click)="deleteStudent(student)" [disabled]="isLoading">Delete</button>
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<br>
+<button (click)="addNewStudent()" [disabled]="isLoading">Add new student</button>

@@ -1,0 +1,17 @@
+<h1 mat-dialog-title>Добавить студента</h1>
+<div mat-dialog-content style="display: inline; padding: 0px; margin: auto;">
+
+  <mat-form-field class="full-width-input">
+    <input matInput type="text" placeholder="Имя студента"
+      [(ngModel)]="editingStudent.name" required>
+  </mat-form-field>
+  <mat-form-field class="full-width-input">
+    <input matInput type="text" placeholder="Фамилия студента"
+      [(ngModel)]="editingStudent.surname" required>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button (click)="onNoClick()">Отмена</button>
+  <button class="right-align" mat-raised-button color="primary"
+    [mat-dialog-close]="editingStudent">Добавить</button>
+</div>
