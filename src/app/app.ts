@@ -24,7 +24,7 @@ import { InMemoryDataService } from './service/in-memory-data';
     MatInputModule,
     //StudentEdior,
     HttpClientModule,
-    RouterOutlet,
+    //RouterOutlet,
     ],
 
   templateUrl: './app.html',

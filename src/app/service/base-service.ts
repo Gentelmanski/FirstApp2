@@ -31,9 +31,4 @@ export class BaseService {
     return this.http.delete(`${this.studentsUrl}/${id}`);
   }
 
-  //Доп метод для получения студента по id
-  getStudentById(id : number): Observable<Student>{
-    return this.http.get<Student>(`${this.studentsUrl}/${id}`);
-  }
-
 }

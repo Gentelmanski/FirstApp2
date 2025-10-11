@@ -63,15 +63,15 @@ export class TableStudents implements OnInit {
 
   dialogAddingNewStudent.afterClosed().subscribe((result: Student) => {
     if (result && result.name && result.surname) {
-      console.log('Dialog result:', result); // Добавьте это
+      console.log('Dialog result:', result);
       this.isLoading = true;
       this.baseService.addNewStudent(result).subscribe({
         next: (response) => {
-          console.log('Student added successfully:', response); // И это
+          console.log('Student added successfully:', response);
           this.loadStudents();
         },
         error: (error) => {
-          console.error('Full error details:', error); // И это
+          console.error('Full error details:', error);
           this.error = 'Ошибка добавления студента';
           this.isLoading = false;
           console.error('Error adding student:', error);
