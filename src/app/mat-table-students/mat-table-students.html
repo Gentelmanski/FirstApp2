@@ -4,7 +4,12 @@
   <div class="table-header">
     <div class="header-actions">
       <!-- Кнопка добавления нового студента -->
-      <button mat-raised-button color="primary" (click)="addNewStudent()" [disabled]="isLoading">
+      <button matButton="filled"
+              color="primary"
+              (click)="addNewStudent()"
+              [disabled]="isLoading"
+              class="add-button">
+
         Добавить студента
       </button>
 
@@ -19,7 +24,7 @@
                  placeholder="Введите имя">
           <!-- Кнопка очистки поиска по имени -->
           <button mat-icon-button matSuffix *ngIf="searchName" (click)="clearNameSearch()">
-            <mat-icon>close</mat-icon>
+
           </button>
         </mat-form-field>
 
@@ -32,17 +37,18 @@
                  placeholder="Введите фамилию">
           <!-- Кнопка очистки поиска по фамилии -->
           <button mat-icon-button matSuffix *ngIf="searchSurname" (click)="clearSurnameSearch()">
-            <mat-icon>close</mat-icon>
+
           </button>
         </mat-form-field>
 
         <!-- Кнопка очистки всех фильтров -->
-        <button mat-icon-button
+        <button mat-button="outlined"
                 *ngIf="searchName || searchSurname"
                 (click)="clearAllSearch()"
                 class="clear-all-button"
                 title="Очистить все фильтры">
-          <mat-icon>clear_all</mat-icon>
+
+          Очистить
         </button>
       </div>
     </div>
@@ -55,10 +61,11 @@
 
     <!-- Блок ошибок -->
     <div *ngIf="error" class="error-message">
+
       {{ error }}
       <!-- Кнопка закрытия ошибки -->
       <button mat-icon-button (click)="error = null">
-        <mat-icon>close</mat-icon>
+
       </button>
     </div>
   </div>
@@ -92,18 +99,24 @@
         <th mat-header-cell *matHeaderCellDef> Действия </th>
         <td mat-cell *matCellDef="let element">
           <!-- Кнопка редактирования -->
-          <button mat-icon-button color="primary"
+          <button mat-button="outlined"
+                  color="primary"
                   (click)="editStudent(element)"
                   title="Редактировать"
-                  [disabled]="isLoading">
-            <mat-icon>edit</mat-icon>
+                  [disabled]="isLoading"
+                  class="action-button">
+
+            Изменить
           </button>
           <!-- Кнопка удаления -->
-          <button mat-icon-button color="warn"
+          <button mat-button="outlined"
+                  color="warn"
                   (click)="deleteStudent(element)"
                   title="Удалить"
-                  [disabled]="isLoading">
-            <mat-icon>delete</mat-icon>
+                  [disabled]="isLoading"
+                  class="action-button">
+
+            Удалить
           </button>
         </td>
       </ng-container>
@@ -116,6 +129,7 @@
       <!-- Строка для пустых данных -->
       <tr *matNoDataRow>
         <td class="no-data" [attr.colspan]="displayedColumns.length">
+
           {{ isLoading ? 'Загрузка...' : ((searchName || searchSurname) ? 'Студенты не найдены' : 'Нет данных') }}
         </td>
       </tr>

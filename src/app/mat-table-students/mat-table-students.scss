@@ -1,0 +1,120 @@
+.table-header {
+  padding: 16px;
+  background: white;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.add-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  max-width: 700px;
+  min-width: 250px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.clear-all-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+// Стили для кнопок действий в таблице
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 4px;
+  font-size: 12px;
+  line-height: 28px;
+  padding: 0 8px;
+  min-width: auto;
+
+  .mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Специфичные стили для кнопок редактирования и удаления в cyan-orange теме
+.edit-button {
+  border-color: #0097A7; // Cyan primary
+  color: #0097A7;
+
+  &:hover:not([disabled]) {
+    background-color: #E0F7FA; // Light cyan background
+  }
+}
+
+.delete-button {
+  border-color: #FF9800; // Orange accent
+  color: #FF9800;
+
+  &:hover:not([disabled]) {
+    background-color: #FFF3E0; // Light orange background
+  }
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #D84315; // Deep orange for errors
+  background: #FBE9E7; // Light deep orange background
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+
+  .mat-icon {
+    color: #D84315;
+  }
+}
+
+.table-container {
+  overflow: auto;
+}
+
+.no-data {
+  text-align: center;
+  padding: 16px;
+  color: rgba(0, 0, 0, 0.54);
+
+  .mat-icon {
+    margin-right: 8px;
+    vertical-align: middle;
+    color: rgba(0, 0, 0, 0.38);
+  }
+}

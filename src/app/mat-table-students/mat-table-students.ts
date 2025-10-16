@@ -199,7 +199,8 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     });
 
     dialogEditStudent.afterClosed().subscribe((result: Student) => {
-      if (result && result.id && result.name && result.surname) {
+      // проверяем, что id не null и не undefined (включая 0)
+      if (result && result.id !== null && result.id !== undefined && result.name && result.surname) {
         this.isLoading = true;
         this.baseService.updateStudent(result).subscribe({
           next: () => {
@@ -217,7 +218,8 @@ export class MatTableStudents implements AfterViewInit, OnInit {
 
   // Удаление студента с подтверждением
   deleteStudent(student: Student) {
-    if (student.id && confirm(`Удалить студента ${student.name} ${student.surname}?`)) {
+    // проверяем, что id не null и не undefined (включая 0)
+    if (student.id !== null && student.id !== undefined && confirm(`Удалить студента ${student.name} ${student.surname}?`)) {
       this.isLoading = true;
       this.baseService.deleteStudent(student.id).subscribe({
         next: () => {

@@ -1,1 +1,80 @@
-// @import "~@angular/material/prebuilt-themes/indigo-pink.css"
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+  margin: 0;
+}
+
+.full-width-input {
+  width: 100%;
+}
+
+// Стили для заголовка
+mat-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+  .mat-icon {
+    color: #0097A7; // Cyan primary color
+  }
+}
+
+// Стили для содержимого
+mat-dialog-content {
+  min-width: 400px;
+  max-height: 60vh;
+  margin: 0;
+  padding: 20px 24px;
+}
+
+// Стили для действий
+mat-dialog-actions {
+  margin: 0;
+  padding: 8px 24px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  gap: 8px;
+
+  .cancel-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(0, 0, 0, 0.6);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  .submit-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:disabled {
+      background-color: rgba(0, 0, 0, 0.12);
+      color: rgba(0, 0, 0, 0.38);
+
+      .mat-icon {
+        color: rgba(0, 0, 0, 0.38);
+      }
+    }
+  }
+}
+
+// Стили для полей ввода
+mat-form-field {
+  .mat-icon {
+    color: rgba(0, 0, 0, 0.54);
+  }
+
+  &.mat-focused {
+    .mat-icon {
+      color: #0097A7; // Cyan primary color when focused
+    }
+  }
+}
