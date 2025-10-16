@@ -32,40 +32,46 @@ import { FormsModule } from '@angular/forms';
   ],
 })
 export class MatTableStudents implements AfterViewInit, OnInit {
+  // Колонки, отображаемые в таблице
   displayedColumns: string[] = ['position', 'name', 'surname', 'actions'];
+
+  // Источник данных для таблицы
   dataSource = new MatTableDataSource<Student>();
 
-  // Пагинация
-  totalItems = 0;
-  pageSize = 5;
-  currentPage = 0;
+  // Переменные пагинации
+  totalItems = 0;        // Общее количество элементов
+  pageSize = 5;          // Количество элементов на странице
+  currentPage = 0;       // Текущая страница
 
-  // Сортировка
+  // Переменные сортировки
   currentSort: SortConfig | undefined = undefined;
 
-  // Поиск
+  // Переменные поиска
   searchName: string = '';
   searchSurname: string = '';
 
+  // Состояние загрузки и ошибки
   isLoading: boolean = false;
   error: string | null = null;
 
+  // Ссылки на компоненты пагинации и сортировки
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
-    private baseService: BaseService,
-    public dialog: MatDialog
+    private baseService: BaseService, // Сервис для работы с API
+    public dialog: MatDialog          // Сервис для работы с диалоговыми окнами
   ) {}
 
   ngOnInit() {
+    // Загрузка студентов при инициализации компонента
     this.loadStudents();
   }
 
   ngAfterViewInit() {
-    // Подписываемся на события сортировки
+    // Подписка на события сортировки после инициализации представления
     this.sort.sortChange.subscribe((sort: Sort) => {
-      this.currentPage = 0; // Сбрасываем на первую страницу при сортировке
+      this.currentPage = 0; // Сброс на первую страницу при сортировке
 
       if (sort.direction) {
         this.currentSort = {
@@ -83,14 +89,14 @@ export class MatTableStudents implements AfterViewInit, OnInit {
   // Обработчик изменения поиска по имени
   onNameSearchChange(name: string): void {
     this.searchName = name;
-    this.currentPage = 0;
+    this.currentPage = 0; // Сброс на первую страницу
     this.loadStudents();
   }
 
   // Обработчик изменения поиска по фамилии
   onSurnameSearchChange(surname: string): void {
     this.searchSurname = surname;
-    this.currentPage = 0;
+    this.currentPage = 0; // Сброс на первую страницу
     this.loadStudents();
   }
 
@@ -116,6 +122,7 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     this.loadStudents();
   }
 
+  // Основной метод загрузки студентов с сервера
   loadStudents() {
     this.isLoading = true;
     this.error = null;
@@ -132,10 +139,11 @@ export class MatTableStudents implements AfterViewInit, OnInit {
       filterConfig.searchSurname = this.searchSurname;
     }
 
+    // Запрос к серверу с пагинацией, сортировкой и фильтрацией
     this.baseService.getStudentsPaginated(pageNumber, this.pageSize, this.currentSort, filterConfig).subscribe({
       next: (response: PaginatedResponse<Student>) => {
-        this.dataSource.data = response.items;
-        this.totalItems = response.meta.total_items;
+        this.dataSource.data = response.items;        // Установка данных таблицы
+        this.totalItems = response.meta.total_items; // Обновление общего количества
         this.isLoading = false;
       },
       error: (error) => {
@@ -146,10 +154,11 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     });
   }
 
+  // Обработчик изменения страницы пагинации
   onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
-    this.loadStudents();
+    this.loadStudents(); // Перезагрузка данных для новой страницы
   }
 
   // Метод для вычисления порядкового номера с учетом текущей страницы
@@ -157,10 +166,11 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     return this.currentPage * this.pageSize + index + 1;
   }
 
+  // Добавление нового студента через диалоговое окно
   addNewStudent() {
     const dialogAddingNewStudent = this.dialog.open(DialogEditWrapper, {
       width: '400px',
-      data: null
+      data: null // Передача null для создания нового студента
     });
 
     dialogAddingNewStudent.afterClosed().subscribe((result: Student) => {
@@ -169,7 +179,7 @@ export class MatTableStudents implements AfterViewInit, OnInit {
         this.baseService.addNewStudent(result).subscribe({
           next: (response) => {
             console.log('Student added successfully:', response);
-            this.loadStudents();
+            this.loadStudents(); // Перезагрузка данных после добавления
           },
           error: (error) => {
             this.error = 'Ошибка добавления студента';
@@ -181,10 +191,11 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     });
   }
 
+  // Редактирование студента через диалоговое окно
   editStudent(student: Student) {
     const dialogEditStudent = this.dialog.open(DialogEditWrapper, {
       width: '400px',
-      data: student
+      data: student // Передача данных студента для редактирования
     });
 
     dialogEditStudent.afterClosed().subscribe((result: Student) => {
@@ -192,7 +203,7 @@ export class MatTableStudents implements AfterViewInit, OnInit {
         this.isLoading = true;
         this.baseService.updateStudent(result).subscribe({
           next: () => {
-            this.loadStudents();
+            this.loadStudents(); // Перезагрузка данных после обновления
           },
           error: (error) => {
             this.error = 'Ошибка обновления студента';
@@ -204,12 +215,13 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     });
   }
 
+  // Удаление студента с подтверждением
   deleteStudent(student: Student) {
     if (student.id && confirm(`Удалить студента ${student.name} ${student.surname}?`)) {
       this.isLoading = true;
       this.baseService.deleteStudent(student.id).subscribe({
         next: () => {
-          this.loadStudents();
+          this.loadStudents(); // Перезагрузка данных после удаления
         },
         error: (error) => {
           this.error = 'Ошибка удаления студента';

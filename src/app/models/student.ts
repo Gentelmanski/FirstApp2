@@ -1,16 +1,14 @@
 export class Student{
   constructor(){
-    this.id = null;
-    this.name = "";
-    this.surname = "";
+    this.id = null;    // ID студента (null для нового студента)
+    this.name = "";    // Имя студента
+    this.surname = ""; // Фамилия студента
   }
   id: number| null;
   name : string;
   surname :string;
 
-
-  //Вдруг нужно, методы для клонирования (Хотя хз, нашел в нете гайды)
-
+  // Метод для создания клона объекта (может пригодиться для избежания мутаций)
   clone() : Student {
     const cloned = new Student();
     cloned.id = this.id;

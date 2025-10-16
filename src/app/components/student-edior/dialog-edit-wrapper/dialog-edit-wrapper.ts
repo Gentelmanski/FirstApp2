@@ -20,18 +20,20 @@ import { BaseService } from '../../../service/base-service';
 })
 
 export class DialogEditWrapper {
-    editingStudent:Student
+    editingStudent:Student // Текущий редактируемый студент
 
-    constructor(public dialogRef: MatDialogRef<DialogEditWrapper>,
-    @Inject(MAT_DIALOG_DATA) public data: Student) {
-      // this.editingStudent = new Student();
+    constructor(
+      public dialogRef: MatDialogRef<DialogEditWrapper>, // Референс на диалоговое окно
+      @Inject(MAT_DIALOG_DATA) public data: Student      // Данные, переданные в диалог (студент для редактирования или null)
+    ) {
+      // Создаем копию объекта студента для редактирования
+      // Если data есть - копируем его, иначе создаем нового студента
       this.editingStudent = data ? Object.assign(new Student(), data) : new Student();
-      // //Создаем копию объекта для редактирования
-      // this.editingStudent = data ? {...data} : new Student();
     }
 
     ngOnInit():void{}
 
+    // Закрытие диалога без сохранения
     onNoClick(): void{
       this.dialogRef.close();
     }

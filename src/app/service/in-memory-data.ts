@@ -5,16 +5,18 @@ import { Student } from '../models/student';
   providedIn: 'root'
 })
 export class InMemoryDataService implements InMemoryDataService {
+  // Создание тестовой базы данных
   createDb() {
     const students = [
       {id: 0, name: 'Имя', surname: 'Фамилия'},
       {id: 1, name: 'Имя 1', surname: 'Фамилия 1'},
       {id: 2, name: 'Имя 2', surname: 'Фамилия 2'}
     ];
-    return {students};
+    return {students}; // Возвращаем объект с таблицей students
   }
 
-    genId(students: Student[]): number {
+  // Генератор ID для новых записей
+  genId(students: Student[]): number {
     return students.length > 0 ?
       Math.max(...students.map(student => student.id ?? 0)) + 1 : 1;
   }

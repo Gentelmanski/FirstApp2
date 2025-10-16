@@ -1,10 +1,8 @@
 import { Student } from './../../models/student';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-//import { Student } from '../../models/student';
 import { CommonModule } from '@angular/common';
 import { BaseService } from '../../service/base-service';
-
 
 @Component({
   selector: 'app-student-edior',
@@ -14,21 +12,18 @@ import { BaseService } from '../../service/base-service';
   styleUrl: './student-edior.scss'
 })
 export class StudentEdior implements OnInit{
-  /*nameEditor = "";
-  surnameEditor = "";*/
-
-  editingStudent : Student;
+  editingStudent : Student; // Текущий редактируемый студент
 
   constructor(private baseservice : BaseService){
-    this.editingStudent = new Student();
-
+    this.editingStudent = new Student(); // Инициализация пустым студентом
   }
 
-ngOnInit(){}
+  ngOnInit(){}
 
+  // Добавление нового студента
   addStudent(): void {
     console.log(this.editingStudent, " ЭТО ТЕКСТ");
     this.baseservice.addNewStudent(this.editingStudent);
-    this.editingStudent = new Student();
+    this.editingStudent = new Student(); // Сброс формы после добавления
   }
 }
