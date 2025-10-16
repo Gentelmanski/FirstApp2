@@ -1,0 +1,148 @@
+import { AfterViewInit, Component, ViewChild, OnInit } from '@angular/core';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { BaseService, PaginatedResponse } from '../service/base-service';
+import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogEditWrapper } from '../components/student-edior/dialog-edit-wrapper/dialog-edit-wrapper';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Student } from '../models/student';
+
+@Component({
+  selector: 'app-mat-table-students',
+  templateUrl: 'mat-table-students.html',
+  styleUrls: ['mat-table-students.scss'],
+  imports: [
+    MatTableModule,
+    MatPaginatorModule,
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
+})
+export class MatTableStudents implements AfterViewInit, OnInit {
+  displayedColumns: string[] = ['position', 'name', 'surname', 'actions'];
+  dataSource = new MatTableDataSource<Student>();
+
+  // Пагинация
+  totalItems = 0;
+  pageSize = 5;
+  currentPage = 0;
+
+  isLoading: boolean = false;
+  error: string | null = null;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  constructor(
+    private baseService: BaseService,
+    public dialog: MatDialog
+  ) {}
+
+  ngOnInit() {
+    this.loadStudents();
+  }
+
+  ngAfterViewInit() {
+    // Для серверной пагинации не связываем paginator с dataSource
+  }
+
+  loadStudents() {
+    this.isLoading = true;
+    this.error = null;
+
+    // Серверная пагинация - page начинается с 1 согласно документации mokky.dev
+    const pageNumber = this.currentPage + 1;
+
+    this.baseService.getStudentsPaginated(pageNumber, this.pageSize).subscribe({
+      next: (response: PaginatedResponse<Student>) => {
+        this.dataSource.data = response.items;
+        this.totalItems = response.meta.total_items;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.error = "Ошибка загрузки студентов";
+        this.isLoading = false;
+        console.log("Error loading students:", error);
+      }
+    });
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadStudents();
+  }
+
+  // Метод для вычисления порядкового номера с учетом текущей страницы
+  getDisplayedIndex(index: number): number {
+    return this.currentPage * this.pageSize + index + 1;
+  }
+
+  addNewStudent() {
+    const dialogAddingNewStudent = this.dialog.open(DialogEditWrapper, {
+      width: '400px',
+      data: null
+    });
+
+    dialogAddingNewStudent.afterClosed().subscribe((result: Student) => {
+      if (result && result.name && result.surname) {
+        this.isLoading = true;
+        this.baseService.addNewStudent(result).subscribe({
+          next: (response) => {
+            console.log('Student added successfully:', response);
+            // После добавления перезагружаем данные с текущей страницы
+            this.loadStudents();
+          },
+          error: (error) => {
+            this.error = 'Ошибка добавления студента';
+            this.isLoading = false;
+            console.error('Error adding student:', error);
+          }
+        });
+      }
+    });
+  }
+
+  editStudent(student: Student) {
+    const dialogEditStudent = this.dialog.open(DialogEditWrapper, {
+      width: '400px',
+      data: student
+    });
+
+    dialogEditStudent.afterClosed().subscribe((result: Student) => {
+      if (result && result.id && result.name && result.surname) {
+        this.isLoading = true;
+        this.baseService.updateStudent(result).subscribe({
+          next: () => {
+            this.loadStudents();
+          },
+          error: (error) => {
+            this.error = 'Ошибка обновления студента';
+            this.isLoading = false;
+            console.error('Error updating student:', error);
+          }
+        });
+      }
+    });
+  }
+
+  deleteStudent(student: Student) {
+    if (student.id && confirm(`Удалить студента ${student.name} ${student.surname}?`)) {
+      this.isLoading = true;
+      this.baseService.deleteStudent(student.id).subscribe({
+        next: () => {
+          this.loadStudents();
+        },
+        error: (error) => {
+          this.error = 'Ошибка удаления студента';
+          this.isLoading = false;
+          console.error('Error deleting student:', error);
+        }
+      });
+    }
+  }
+}

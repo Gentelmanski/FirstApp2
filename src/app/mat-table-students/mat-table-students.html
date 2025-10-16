@@ -1,0 +1,82 @@
+<div class="mat-elevation-z8">
+  <div class="table-header">
+    <button mat-raised-button color="primary" (click)="addNewStudent()" [disabled]="isLoading">
+      Добавить студента
+    </button>
+
+    <div *ngIf="isLoading" class="loading-indicator">
+      <mat-spinner diameter="24"></mat-spinner>
+      <span>Загрузка...</span>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+      <button mat-icon-button (click)="error = null">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource">
+
+      <!-- Position Column -->
+      <ng-container matColumnDef="position">
+        <th mat-header-cell *matHeaderCellDef> № </th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          {{ getDisplayedIndex(i) }}
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Имя </th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+      </ng-container>
+
+      <!-- Surname Column -->
+      <ng-container matColumnDef="surname">
+        <th mat-header-cell *matHeaderCellDef> Фамилия </th>
+        <td mat-cell *matCellDef="let element"> {{element.surname}} </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Действия </th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button color="primary"
+                  (click)="editStudent(element)"
+                  title="Редактировать"
+                  [disabled]="isLoading">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn"
+                  (click)="deleteStudent(element)"
+                  title="Удалить"
+                  [disabled]="isLoading">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Empty state -->
+      <tr *matNoDataRow>
+        <td class="no-data" [attr.colspan]="displayedColumns.length">
+          {{ isLoading ? 'Загрузка...' : 'Нет данных' }}
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <mat-paginator [length]="totalItems"
+                 [pageSize]="pageSize"
+                 [pageSizeOptions]="[5, 10, 20]"
+                 [pageIndex]="currentPage"
+                 (page)="onPageChange($event)"
+                 showFirstLastButtons
+                 aria-label="Select page of students">
+  </mat-paginator>
+</div>
