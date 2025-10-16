@@ -15,6 +15,11 @@ export interface PaginatedResponse<T> {
   items: T[];
 }
 
+export interface SortConfig {
+  active: string;
+  direction: 'asc' | 'desc';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,11 +29,17 @@ export class BaseService {
 
   constructor(private http: HttpClient) { }
 
-  // Серверная пагинация согласно документации mokky.dev
-  getStudentsPaginated(page: number, limit: number = 5): Observable<PaginatedResponse<Student>> {
-    const params = new HttpParams()
+  // Серверная пагинация и сортировка согласно документации mokky.dev
+  getStudentsPaginated(page: number, limit: number = 5, sortConfig?: SortConfig): Observable<PaginatedResponse<Student>> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
+
+    // Добавляем параметр сортировки если он передан
+    if (sortConfig && sortConfig.active) {
+      const sortBy = sortConfig.direction === 'desc' ? `-${sortConfig.active}` : sortConfig.active;
+      params = params.set('sortBy', sortBy);
+    }
 
     return this.http.get<PaginatedResponse<Student>>(this.studentsUrl, { params });
   }

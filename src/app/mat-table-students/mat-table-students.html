@@ -18,9 +18,9 @@
   </div>
 
   <div class="table-container">
-    <table mat-table [dataSource]="dataSource">
+    <table mat-table [dataSource]="dataSource" matSort>
 
-      <!-- Position Column -->
+      <!-- ID -->
       <ng-container matColumnDef="position">
         <th mat-header-cell *matHeaderCellDef> № </th>
         <td mat-cell *matCellDef="let element; let i = index">
@@ -28,19 +28,19 @@
         </td>
       </ng-container>
 
-      <!-- Name Column -->
+      <!-- ИМЯ -->
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Имя </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="name"> Имя </th>
         <td mat-cell *matCellDef="let element"> {{element.name}} </td>
       </ng-container>
 
-      <!-- Surname Column -->
+      <!-- ФАМИЛИЯ -->
       <ng-container matColumnDef="surname">
-        <th mat-header-cell *matHeaderCellDef> Фамилия </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="surname"> Фамилия </th>
         <td mat-cell *matCellDef="let element"> {{element.surname}} </td>
       </ng-container>
 
-      <!-- Actions Column -->
+      <!-- ДЕЙСТВИЯ -->
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Действия </th>
         <td mat-cell *matCellDef="let element">

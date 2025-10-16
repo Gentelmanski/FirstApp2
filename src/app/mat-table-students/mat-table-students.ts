@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, ViewChild, OnInit } from '@angular/core';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { BaseService, PaginatedResponse } from '../service/base-service';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
+import { BaseService, PaginatedResponse, SortConfig } from '../service/base-service';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditWrapper } from '../components/student-edior/dialog-edit-wrapper/dialog-edit-wrapper';
@@ -17,6 +18,7 @@ import { Student } from '../models/student';
   imports: [
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     CommonModule,
     MatButtonModule,
     MatIconModule,
@@ -32,10 +34,14 @@ export class MatTableStudents implements AfterViewInit, OnInit {
   pageSize = 5;
   currentPage = 0;
 
+  // Сортировка
+  currentSort: SortConfig | undefined = undefined;
+
   isLoading: boolean = false;
   error: string | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
     private baseService: BaseService,
@@ -47,7 +53,15 @@ export class MatTableStudents implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    // Для серверной пагинации не связываем paginator с dataSource
+    // Подписываемся на события сортировки
+    this.sort.sortChange.subscribe((sort: Sort) => {
+      this.currentPage = 0; // Сбрасываем на первую страницу при сортировке
+      this.currentSort = {
+        active: sort.active,
+        direction: sort.direction as 'asc' | 'desc'
+      };
+      this.loadStudents();
+    });
   }
 
   loadStudents() {
@@ -57,7 +71,7 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     // Серверная пагинация - page начинается с 1 согласно документации mokky.dev
     const pageNumber = this.currentPage + 1;
 
-    this.baseService.getStudentsPaginated(pageNumber, this.pageSize).subscribe({
+    this.baseService.getStudentsPaginated(pageNumber, this.pageSize, this.currentSort).subscribe({
       next: (response: PaginatedResponse<Student>) => {
         this.dataSource.data = response.items;
         this.totalItems = response.meta.total_items;
