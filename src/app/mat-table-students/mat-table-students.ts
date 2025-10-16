@@ -2,14 +2,17 @@ import { AfterViewInit, Component, ViewChild, OnInit } from '@angular/core';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { BaseService, PaginatedResponse, SortConfig } from '../service/base-service';
+import { BaseService, PaginatedResponse, SortConfig, FilterConfig } from '../service/base-service';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogEditWrapper } from '../components/student-edior/dialog-edit-wrapper/dialog-edit-wrapper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { Student } from '../models/student';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-mat-table-students',
@@ -22,7 +25,10 @@ import { Student } from '../models/student';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule
   ],
 })
 export class MatTableStudents implements AfterViewInit, OnInit {
@@ -36,6 +42,10 @@ export class MatTableStudents implements AfterViewInit, OnInit {
 
   // Сортировка
   currentSort: SortConfig | undefined = undefined;
+
+  // Поиск
+  searchName: string = '';
+  searchSurname: string = '';
 
   isLoading: boolean = false;
   error: string | null = null;
@@ -56,12 +66,54 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     // Подписываемся на события сортировки
     this.sort.sortChange.subscribe((sort: Sort) => {
       this.currentPage = 0; // Сбрасываем на первую страницу при сортировке
-      this.currentSort = {
-        active: sort.active,
-        direction: sort.direction as 'asc' | 'desc'
-      };
+
+      if (sort.direction) {
+        this.currentSort = {
+          active: sort.active,
+          direction: sort.direction as 'asc' | 'desc'
+        };
+      } else {
+        this.currentSort = undefined;
+      }
+
       this.loadStudents();
     });
+  }
+
+  // Обработчик изменения поиска по имени
+  onNameSearchChange(name: string): void {
+    this.searchName = name;
+    this.currentPage = 0;
+    this.loadStudents();
+  }
+
+  // Обработчик изменения поиска по фамилии
+  onSurnameSearchChange(surname: string): void {
+    this.searchSurname = surname;
+    this.currentPage = 0;
+    this.loadStudents();
+  }
+
+  // Очистка поиска по имени
+  clearNameSearch(): void {
+    this.searchName = '';
+    this.currentPage = 0;
+    this.loadStudents();
+  }
+
+  // Очистка поиска по фамилии
+  clearSurnameSearch(): void {
+    this.searchSurname = '';
+    this.currentPage = 0;
+    this.loadStudents();
+  }
+
+  // Полная очистка всех фильтров
+  clearAllSearch(): void {
+    this.searchName = '';
+    this.searchSurname = '';
+    this.currentPage = 0;
+    this.loadStudents();
   }
 
   loadStudents() {
@@ -71,7 +123,16 @@ export class MatTableStudents implements AfterViewInit, OnInit {
     // Серверная пагинация - page начинается с 1 согласно документации mokky.dev
     const pageNumber = this.currentPage + 1;
 
-    this.baseService.getStudentsPaginated(pageNumber, this.pageSize, this.currentSort).subscribe({
+    // Конфигурация фильтрации
+    const filterConfig: FilterConfig = {};
+    if (this.searchName) {
+      filterConfig.searchName = this.searchName;
+    }
+    if (this.searchSurname) {
+      filterConfig.searchSurname = this.searchSurname;
+    }
+
+    this.baseService.getStudentsPaginated(pageNumber, this.pageSize, this.currentSort, filterConfig).subscribe({
       next: (response: PaginatedResponse<Student>) => {
         this.dataSource.data = response.items;
         this.totalItems = response.meta.total_items;
@@ -108,7 +169,6 @@ export class MatTableStudents implements AfterViewInit, OnInit {
         this.baseService.addNewStudent(result).subscribe({
           next: (response) => {
             console.log('Student added successfully:', response);
-            // После добавления перезагружаем данные с текущей страницы
             this.loadStudents();
           },
           error: (error) => {

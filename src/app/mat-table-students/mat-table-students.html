@@ -1,8 +1,45 @@
 <div class="mat-elevation-z8">
   <div class="table-header">
-    <button mat-raised-button color="primary" (click)="addNewStudent()" [disabled]="isLoading">
-      Добавить студента
-    </button>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="addNewStudent()" [disabled]="isLoading">
+        Добавить студента
+      </button>
+
+      <div class="search-container">
+        <!-- Поиск по имени -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по имени</mat-label>
+          <input matInput
+                 [ngModel]="searchName"
+                 (ngModelChange)="onNameSearchChange($event)"
+                 placeholder="Введите имя">
+          <button mat-icon-button matSuffix *ngIf="searchName" (click)="clearNameSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Поиск по фамилии -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по фамилии</mat-label>
+          <input matInput
+                 [ngModel]="searchSurname"
+                 (ngModelChange)="onSurnameSearchChange($event)"
+                 placeholder="Введите фамилию">
+          <button mat-icon-button matSuffix *ngIf="searchSurname" (click)="clearSurnameSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Кнопка очистки всех фильтров -->
+        <button mat-icon-button
+                *ngIf="searchName || searchSurname"
+                (click)="clearAllSearch()"
+                class="clear-all-button"
+                title="Очистить все фильтры">
+          <mat-icon>clear_all</mat-icon>
+        </button>
+      </div>
+    </div>
 
     <div *ngIf="isLoading" class="loading-indicator">
       <mat-spinner diameter="24"></mat-spinner>
@@ -62,10 +99,10 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-      <!-- Empty state -->
+      <!-- ЕСЛИ ПУСТО -->
       <tr *matNoDataRow>
         <td class="no-data" [attr.colspan]="displayedColumns.length">
-          {{ isLoading ? 'Загрузка...' : 'Нет данных' }}
+          {{ isLoading ? 'Загрузка...' : ((searchName || searchSurname) ? 'Студенты не найдены' : 'Нет данных') }}
         </td>
       </tr>
     </table>
