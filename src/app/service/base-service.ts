@@ -31,7 +31,8 @@ export interface FilterConfig {
   providedIn: 'root'
 })
 export class BaseService {
-  private baseUrl = 'https://2b8ebcded7ca3c25.mokky.dev'; // Базовый URL API
+  private baseUrl = 'http://localhost:8080/api'; // Базовый URL API
+  //как было до перехода на свой бэк private baseUrl = 'https://2b8ebcded7ca3c25.mokky.dev'; // Базовый URL API
   private studentsUrl = `${this.baseUrl}/students`;       // URL для работы со студентами
 
   constructor(private http: HttpClient) { }

@@ -95,31 +95,33 @@
       </ng-container>
 
       <!-- Колонка Действия -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef> Действия </th>
-        <td mat-cell *matCellDef="let element">
-          <!-- Кнопка редактирования -->
-          <button mat-button="outlined"
-                  color="primary"
-                  (click)="editStudent(element)"
-                  title="Редактировать"
-                  [disabled]="isLoading"
-                  class="action-button">
+<ng-container matColumnDef="actions">
+  <th mat-header-cell *matHeaderCellDef> Действия </th>
+  <td mat-cell *matCellDef="let element">
+    <!-- Контейнер для FAB кнопок -->
+    <div class="fab-actions-container">
+      <!-- Кнопка редактирования -->
+      <button mat-fab
+              color="primary"
+              (click)="editStudent(element)"
+              title="Редактировать"
+              [disabled]="isLoading"
+              class="fab-button">
+        <mat-icon>edit</mat-icon>
+      </button>
 
-            Изменить
-          </button>
-          <!-- Кнопка удаления -->
-          <button mat-button="outlined"
-                  color="warn"
-                  (click)="deleteStudent(element)"
-                  title="Удалить"
-                  [disabled]="isLoading"
-                  class="action-button">
-
-            Удалить
-          </button>
-        </td>
-      </ng-container>
+      <!-- Кнопка удаления -->
+      <button mat-fab
+              color="warn"
+              (click)="deleteStudent(element)"
+              title="Удалить"
+              [disabled]="isLoading"
+              class="fab-button">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </td>
+</ng-container>
 
       <!-- Шаблон строк заголовка -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
