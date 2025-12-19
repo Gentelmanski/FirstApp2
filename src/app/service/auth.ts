@@ -1,6 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, tap, Subject, takeUntil } from 'rxjs';
 import { LoginRequest, LoginResponse, User, RegisterRequest } from '../models/user';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
@@ -12,6 +12,7 @@ export class AuthService {
   private baseUrl = 'http://localhost:8080/api/auth';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
+  private logoutSubject = new Subject<void>();
 
   currentUser$ = this.currentUserSubject.asObservable();
   token$ = this.tokenSubject.asObservable();
@@ -45,6 +46,7 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/login`, credentials).pipe(
+      takeUntil(this.logoutSubject),
       tap(response => {
         this.setAuthData(response.token, response.user);
       })
@@ -53,6 +55,7 @@ export class AuthService {
 
   register(data: RegisterRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/register`, data).pipe(
+      takeUntil(this.logoutSubject),
       tap(response => {
         this.setAuthData(response.token, response.user);
       })
@@ -60,38 +63,39 @@ export class AuthService {
   }
 
   logout(): void {
+    // Отправляем сигнал об отмене всех текущих запросов
+    this.logoutSubject.next();
+    
     this.clearAuthData();
-    // Перенаправляем на страницу логина с флагом очистки
+    
+    // Принудительно перенаправляем на страницу логина
     this.router.navigate(['/login'], { 
       queryParams: { logout: true },
-      replaceUrl: true // Заменяем текущую запись в истории
+      replaceUrl: true
+    }).then(() => {
+      // После навигации принудительно перезагружаем страницу для очистки состояния
+      if (isPlatformBrowser(this.platformId)) {
+        // Только если не в режиме SSR
+        window.location.href = '/login?logout=true';
+      }
     });
   }
 
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/me`).pipe(
-      tap(user => {
-        this.currentUserSubject.next(user);
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('currentUser', JSON.stringify(user));
-        }
-      }),
-      // Обработка ошибок
-      tap({
-        error: (error) => {
-          if (error.status === 401) {
-            this.clearAuthData();
-            this.router.navigate(['/login']);
-          }
-        }
-      })
+      takeUntil(this.logoutSubject)
     );
   }
 
   refreshUserData(): void {
     this.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentUserSubject.next(user);
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+      },
       error: () => {
-        // Автоматический выход при ошибке авторизации
         this.logout();
       }
     });
@@ -175,7 +179,7 @@ export class AuthService {
       try {
         localStorage.removeItem('token');
         localStorage.removeItem('currentUser');
-        // Также очищаем sessionStorage на всякий случай
+        // Очищаем sessionStorage и другие хранилища
         sessionStorage.clear();
       } catch (error) {
         console.error('Error clearing auth data from storage:', error);
