@@ -1,0 +1,120 @@
+<div class="login-container">
+  <div class="login-card">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <h1>🎓 Student Management System</h1>
+        </mat-card-title>
+        <mat-card-subtitle>
+          Войдите в систему для управления студентами
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="0ms">
+          <!-- Вкладка входа -->
+          <mat-tab label="Вход">
+            <form class="login-form" (ngSubmit)="onLogin()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" [(ngModel)]="loginData.email" name="email" required>
+                <mat-icon matSuffix>email</mat-icon>
+                <mat-hint>Введите ваш email</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Пароль</mat-label>
+                <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                       [(ngModel)]="loginData.password" name="password" required>
+                <button mat-icon-button matSuffix type="button" 
+                        (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" 
+                        [attr.aria-pressed]="hidePassword">
+                  <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
+                <mat-hint>Введите ваш пароль</mat-hint>
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button mat-raised-button color="primary" type="submit" class="full-width" 
+                        [disabled]="isLoading">
+                  <span *ngIf="!isLoading">Войти</span>
+                  <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+                </button>
+              </div>
+
+              <div class="test-credentials">
+                <p><strong>Тестовые данные:</strong></p>
+                <p>Email: <code>admin@example.com</code></p>
+                <p>Пароль: <code>admin123</code></p>
+              </div>
+            </form>
+          </mat-tab>
+
+          <!-- Вкладка регистрации -->
+          <mat-tab label="Регистрация">
+            <form class="register-form" (ngSubmit)="onRegister()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" [(ngModel)]="registerData.email" name="regEmail" required>
+                <mat-icon matSuffix>email</mat-icon>
+                <mat-hint>Введите ваш email</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Роль</mat-label>
+                <mat-select [(ngModel)]="registerData.role" name="role" required>
+                  <mat-option *ngFor="let role of roles" [value]="role.value">
+                    {{role.viewValue}}
+                  </mat-option>
+                </mat-select>
+                <mat-hint>Выберите вашу роль в системе</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Пароль</mat-label>
+                <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                       [(ngModel)]="registerData.password" name="regPassword" required>
+                <button mat-icon-button matSuffix type="button" 
+                        (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" 
+                        [attr.aria-pressed]="hidePassword">
+                  <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
+                <mat-hint>Минимум 6 символов</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Подтверждение пароля</mat-label>
+                <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" 
+                       [(ngModel)]="confirmPassword" name="confirmPassword" required>
+                <button mat-icon-button matSuffix type="button" 
+                        (click)="hideConfirmPassword = !hideConfirmPassword" 
+                        [attr.aria-label]="'Hide password'" 
+                        [attr.aria-pressed]="hideConfirmPassword">
+                  <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
+                <mat-hint>Повторите пароль</mat-hint>
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button mat-raised-button color="accent" type="submit" class="full-width" 
+                        [disabled]="isLoading">
+                  <span *ngIf="!isLoading">Зарегистрироваться</span>
+                  <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+                </button>
+              </div>
+
+              <div class="role-info">
+                <p><strong>Описание ролей:</strong></p>
+                <ul>
+                  <li><strong>Студент</strong> - может просматривать и редактировать только свои данные</li>
+                  <li><strong>Преподаватель</strong> - может просматривать и редактировать всех студентов</li>
+                  <li><strong>Администратор</strong> - полный доступ ко всем функциям</li>
+                </ul>
+              </div>
+            </form>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

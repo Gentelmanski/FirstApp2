@@ -1,0 +1,42 @@
+<div class="app-container">
+  <!-- Шапка с навигацией -->
+  <mat-toolbar color="primary" class="toolbar">
+    <mat-toolbar-row>
+      <span class="logo">
+        🎓 Student Management
+      </span>
+      
+      <span class="spacer"></span>
+      
+      <div *ngIf="currentUser" class="user-info">
+        <span class="user-email">{{ currentUser.email }}</span>
+        <span class="user-role">{{ userRoleLabel }}</span>
+        
+        <button mat-icon-button [matMenuTriggerFor]="userMenu">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item disabled>
+            <mat-icon>person</mat-icon>
+            <span>{{ currentUser.email }}</span>
+          </button>
+          <button mat-menu-item disabled>
+            <mat-icon>badge</mat-icon>
+            <span>{{ userRoleLabel }}</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Выйти</span>
+          </button>
+        </mat-menu>
+      </div>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <!-- Основной контент -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

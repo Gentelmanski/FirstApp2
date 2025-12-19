@@ -6,57 +6,57 @@ import { Observable } from 'rxjs';
 // Интерфейс для ответа с пагинацией
 export interface PaginatedResponse<T> {
   meta: {
-    total_items: number;    // Общее количество элементов
-    total_pages: number;    // Общее количество страниц
-    current_page: number;   // Текущая страница
-    per_page: number;       // Количество элементов на странице
-    remaining_count: number;// Оставшееся количество элементов
+    total_items: number;
+    total_pages: number;
+    current_page: number;
+    per_page: number;
+    remaining_count: number;
   };
-  items: T[]; // Массив элементов текущей страницы
+  items: T[];
 }
 
 // Интерфейс для конфигурации сортировки
 export interface SortConfig {
-  active: string;          // Поле для сортировки
-  direction: 'asc' | 'desc'; // Направление сортировки
+  active: string;
+  direction: 'asc' | 'desc';
 }
 
 // Интерфейс для конфигурации фильтрации
 export interface FilterConfig {
-  searchName?: string;    // Фильтр по имени
-  searchSurname?: string; // Фильтр по фамилии
+  searchName?: string;
+  searchSurname?: string;
+  searchEmail?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class BaseService {
-  private baseUrl = 'http://localhost:8080/api'; // Базовый URL API
-  //как было до перехода на свой бэк private baseUrl = 'https://2b8ebcded7ca3c25.mokky.dev'; // Базовый URL API
-  private studentsUrl = `${this.baseUrl}/students`;       // URL для работы со студентами
+  private baseUrl = 'http://localhost:8080/api';
+  private studentsUrl = `${this.baseUrl}/students`;
 
   constructor(private http: HttpClient) { }
 
   // Получение списка студентов с пагинацией, сортировкой и фильтрацией
   getStudentsPaginated(
-    page: number,           // Номер страницы (начиная с 1)
-    limit: number = 5,      // Количество элементов на странице
-    sortConfig?: SortConfig, // Конфигурация сортировки
-    filterConfig?: FilterConfig // Конфигурация фильтрации
+    page: number,
+    limit: number = 5,
+    sortConfig?: SortConfig,
+    filterConfig?: FilterConfig
   ): Observable<PaginatedResponse<Student>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    // Добавление параметра сортировки если передан
+    // Добавление параметра сортировки
     if (sortConfig && sortConfig.active) {
       const sortBy = sortConfig.direction === 'desc' ? `-${sortConfig.active}` : sortConfig.active;
       params = params.set('sortBy', sortBy);
     }
 
-    // Добавление параметров поиска если переданы
+    // Добавление параметров поиска
     if (filterConfig?.searchName) {
-      params = params.set('name', `*${filterConfig.searchName}*`); // Поиск с подстановочными знаками
+      params = params.set('name', `*${filterConfig.searchName}*`);
     }
     if (filterConfig?.searchSurname) {
       params = params.set('surname', `*${filterConfig.searchSurname}*`);
