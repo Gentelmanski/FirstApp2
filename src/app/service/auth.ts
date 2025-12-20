@@ -126,19 +126,20 @@ export class AuthService {
     return this.hasRole('student');
   }
 
-  canEditStudent(studentId: number): boolean {
-    const user = this.getCurrentUserValue();
-    
-    if (!user) return false;
-    
-    if (user.role === 'admin') return true;
-    if (user.role === 'teacher') return true;
-    if (user.role === 'student') {
-      return user.student_id === studentId;
-    }
-    
-    return false;
+ canEditStudent(studentId: number): boolean {
+  const user = this.getCurrentUserValue();
+  
+  if (!user) return false;
+  
+  if (user.role === 'admin') return true;
+  if (user.role === 'teacher') return true;
+  if (user.role === 'student') {
+    // Проверяем, что student_id существует и совпадает
+    return user.student_id !== undefined && user.student_id === studentId;
   }
+  
+  return false;
+}
 
   canCreateStudent(): boolean {
     const user = this.getCurrentUserValue();

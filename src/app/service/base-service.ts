@@ -34,25 +34,29 @@ export class BaseService {
   constructor(private http: HttpClient) {}
 
   getStudentsPaginated(page: number, pageSize: number, sort?: SortConfig, filter?: FilterConfig): Observable<PaginatedResponse<Student>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', pageSize.toString());
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('limit', pageSize.toString());
 
-    if (sort && sort.active && sort.direction) {
-      const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
-      params = params.set('sortBy', sortParam);
-    }
-
-    if (filter?.searchName) {
-      params = params.set('name', filter.searchName);
-    }
-
-    if (filter?.searchSurname) {
-      params = params.set('surname', filter.searchSurname);
-    }
-
-    return this.http.get<PaginatedResponse<Student>>(`${this.apiUrl}/students`, { params });
+  if (sort && sort.active && sort.direction) {
+    const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
+    params = params.set('sortBy', sortParam);
   }
+
+  if (filter?.searchName) {
+    params = params.set('name', filter.searchName);
+  }
+
+  if (filter?.searchSurname) {
+    params = params.set('surname', filter.searchSurname);
+  }
+
+  if (filter?.searchEmail) {
+    params = params.set('email', filter.searchEmail);
+  }
+
+  return this.http.get<PaginatedResponse<Student>>(`${this.apiUrl}/students`, { params });
+}
 
   addNewStudent(student: Student): Observable<Student> {
     // Преобразуем студента в формат, который ожидает сервер

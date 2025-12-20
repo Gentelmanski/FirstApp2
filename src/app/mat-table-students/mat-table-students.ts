@@ -108,23 +108,20 @@ export class MatTableStudents implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private updateDisplayedColumns(): void {
-    const baseColumns = ['position', 'name', 'surname'];
-    
-    if (this.authService.isAdmin() || this.authService.isTeacher()) {
-      baseColumns.push('email');
-    }
-    
-    if (this.authService.isAdmin() || this.authService.isTeacher() || this.authService.isStudent()) {
-      baseColumns.push('actions');
-    }
-    
-    this.displayedColumns = baseColumns;
+  const baseColumns = ['position', 'name', 'surname'];
+  
+  // Email показываем всем ролям, включая студентов
+  baseColumns.push('email');
+  
+  // Действия показываем всем ролям
+  baseColumns.push('actions');
+  
+  this.displayedColumns = baseColumns;
   }
 
   canEditStudent(student: Student): boolean {
-    return this.authService.canEditStudent(student.id || 0);
+  return this.authService.canEditStudent(student.id || 0);
   }
-
   canDeleteStudent(): boolean {
     return this.authService.canDeleteStudent();
   }
@@ -162,46 +159,51 @@ export class MatTableStudents implements AfterViewInit, OnInit, OnDestroy {
     this.loadStudents();
   }
 
-  loadStudents() {
-    // Не загружаем если нет пользователя
-    if (!this.authService.isAuthenticated()) {
-      this.clearTableData();
-      return;
-    }
-
-    this.isLoading = true;
-    this.error = null;
-
-    const pageNumber = this.currentPage + 1;
-
-    const filterConfig: FilterConfig = {};
-    if (this.searchName) {
-      filterConfig.searchName = this.searchName;
-    }
-    if (this.searchSurname) {
-      filterConfig.searchSurname = this.searchSurname;
-    }
-
-    this.baseService.getStudentsPaginated(pageNumber, this.pageSize, this.currentSort, filterConfig)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: PaginatedResponse<Student>) => {
-          this.dataSource.data = response.items;
-          this.totalItems = response.meta.total_items;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          // Если ошибка 401 (Unauthorized) - это нормально при выходе
-          if (error.status === 401) {
-            this.clearTableData();
-          } else {
-            this.error = "Ошибка загрузки студентов";
-            this.showError(error.error?.error || 'Ошибка загрузки данных');
-          }
-          this.isLoading = false;
-        }
-      });
+ loadStudents() {
+  // Не загружаем если нет пользователя
+  if (!this.authService.isAuthenticated()) {
+    this.clearTableData();
+    return;
   }
+
+  this.isLoading = true;
+  this.error = null;
+
+  const pageNumber = this.currentPage + 1;
+
+  const filterConfig: FilterConfig = {};
+  if (this.searchName) {
+    filterConfig.searchName = this.searchName;
+  }
+  if (this.searchSurname) {
+    filterConfig.searchSurname = this.searchSurname;
+  }
+  
+  // Добавляем фильтр по email только для админов и преподавателей
+  if ((this.authService.isAdmin() || this.authService.isTeacher()) && this.searchEmail) {
+    filterConfig.searchEmail = this.searchEmail;
+  }
+
+  this.baseService.getStudentsPaginated(pageNumber, this.pageSize, this.currentSort, filterConfig)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: PaginatedResponse<Student>) => {
+        this.dataSource.data = response.items;
+        this.totalItems = response.meta.total_items;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        // Если ошибка 401 (Unauthorized) - это нормально при выходе
+        if (error.status === 401) {
+          this.clearTableData();
+        } else {
+          this.error = "Ошибка загрузки студентов";
+          this.showError(error.error?.error || 'Ошибка загрузки данных');
+        }
+        this.isLoading = false;
+      }
+    });
+}
 
   private clearTableData(): void {
     this.dataSource.data = [];
