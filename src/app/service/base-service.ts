@@ -55,11 +55,25 @@ export class BaseService {
   }
 
   addNewStudent(student: Student): Observable<Student> {
-    return this.http.post<Student>(`${this.apiUrl}/students`, student);
+    // Преобразуем студента в формат, который ожидает сервер
+    const studentToSend = {
+      name: student.name,
+      surname: student.surname,
+      email: student.email || '' // Убедимся, что email не undefined
+    };
+    
+    return this.http.post<Student>(`${this.apiUrl}/students`, studentToSend);
   }
 
   updateStudent(student: Student): Observable<Student> {
-    return this.http.put<Student>(`${this.apiUrl}/students/${student.id}`, student);
+    // Преобразуем студента в формат, который ожидает сервер
+    const studentToSend = {
+      name: student.name,
+      surname: student.surname,
+      email: student.email || ''
+    };
+    
+    return this.http.put<Student>(`${this.apiUrl}/students/${student.id}`, studentToSend);
   }
 
   deleteStudent(id: number): Observable<void> {
