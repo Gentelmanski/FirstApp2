@@ -2,7 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../service/auth';
 import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
+import { catchError, throwError, takeUntil } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -30,18 +30,28 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
   
   return next(authReq).pipe(
+    takeUntil(authService.getLogoutSubject()),
     catchError(error => {
+      // Пропускаем ошибки от публичных маршрутов или если уже на странице логина
+      if (isPublicUrl || router.url.includes('/login')) {
+        return throwError(() => error);
+      }
+      
       if (error.status === 401) {
-        // Unauthorized - очищаем данные и перенаправляем на логин
-        authService.logout();
-        router.navigate(['/login'], { 
-          queryParams: { returnUrl: router.url },
-          replaceUrl: true
-        });
+        // Unauthorized - очищаем данные без редиректа
+        authService.clearAuthState();
+        authService.clearStoredAuthData();
+        
+        // Только если не на странице логина, делаем редирект
+        if (!router.url.includes('/login')) {
+          router.navigate(['/login'], { 
+            queryParams: { expired: true },
+            replaceUrl: true 
+          });
+        }
       } else if (error.status === 403) {
         // Forbidden
         console.error('Доступ запрещен');
-        // Можно показать уведомление или редирект
         if (!router.url.includes('/login')) {
           router.navigate(['/'], { replaceUrl: true });
         }

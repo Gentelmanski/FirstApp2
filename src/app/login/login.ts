@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../service/auth';
 import { LoginRequest, RegisterRequest, ROLES } from '../models/user';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -33,7 +34,7 @@ import { LoginRequest, RegisterRequest, ROLES } from '../models/user';
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   loginData: LoginRequest = {
     email: '',
     password: ''
@@ -58,6 +59,8 @@ export class LoginComponent implements OnInit {
     { value: ROLES.ADMIN, viewValue: 'Администратор' }
   ];
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private authService: AuthService,
     private router: Router,
@@ -66,28 +69,40 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Проверяем, пришел ли пользователь после выхода
-    this.route.queryParams.subscribe(params => {
-      if (params['logout']) {
-        this.logoutMessage = true;
-        this.showSuccess('Вы успешно вышли из системы');
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        if (params['logout']) {
+          this.logoutMessage = true;
+          this.showSuccess('Вы успешно вышли из системы');
+          
+          // Очищаем query params чтобы сообщение не показывалось при обновлении
+          this.router.navigate([], {
+            queryParams: {},
+            replaceUrl: true
+          });
+        }
         
-        // Очищаем query params чтобы сообщение не показывалось при обновлении
-        this.router.navigate([], {
-          queryParams: {},
-          replaceUrl: true
-        });
-      }
-      
-      if (params['expired']) {
-        this.showError('Сессия истекла. Пожалуйста, войдите снова.');
-      }
-    });
+        if (params['expired']) {
+          this.showError('Сессия истекла. Пожалуйста, войдите снова.');
+        }
+      });
+    
+    // При заходе на страницу логина, если есть токен, но нет пользователя, очищаем
+    if (this.authService.getToken() && !this.authService.getCurrentUserValue()) {
+      this.authService.clearAuthState();
+      this.authService.clearStoredAuthData();
+    }
     
     // Если пользователь уже авторизован, редирект на главную
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/']);
     }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onLogin(): void {
@@ -98,19 +113,21 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
     
-    this.authService.login(this.loginData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.showSuccess('Вход выполнен успешно!');
-        
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(returnUrl, { replaceUrl: true });
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.showError(error.error?.error || 'Ошибка входа. Проверьте данные.');
-      }
-    });
+    this.authService.login(this.loginData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.showSuccess('Вход выполнен успешно!');
+          
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+          this.router.navigateByUrl(returnUrl, { replaceUrl: true });
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.showError(error.error?.error || 'Ошибка входа. Проверьте данные.');
+        }
+      });
   }
 
   onRegister(): void {
@@ -136,19 +153,21 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.authService.register(this.registerData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.showSuccess('Регистрация выполнена успешно!');
-        
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(returnUrl, { replaceUrl: true });
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.showError(error.error?.error || 'Ошибка регистрации');
-      }
-    });
+    this.authService.register(this.registerData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.showSuccess('Регистрация выполнена успешно!');
+          
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+          this.router.navigateByUrl(returnUrl, { replaceUrl: true });
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.showError(error.error?.error || 'Ошибка регистрации');
+        }
+      });
   }
 
   private isValidEmail(email: string): boolean {

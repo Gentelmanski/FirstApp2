@@ -13,13 +13,17 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    // Если пользователь аутентифицирован, проверяем актуальность токена
-    if (this.authService.isAuthenticated()) {
-      // Возвращаем true, но также можем проверить валидность токена
+    // Если уже на странице логина, разрешаем доступ
+    if (state.url.includes('/login')) {
       return of(true);
     }
 
-    // Not logged in - redirect to login page
+    // Если пользователь аутентифицирован, разрешаем доступ
+    if (this.authService.isAuthenticated()) {
+      return of(true);
+    }
+
+    // Не аутентифицирован и не на странице логина - редирект на логин
     this.router.navigate(['/login'], { 
       queryParams: { 
         returnUrl: state.url,

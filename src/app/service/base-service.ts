@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Student } from '../models/student';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Student } from '../models/student';
 
-// Интерфейс для ответа с пагинацией
 export interface PaginatedResponse<T> {
   meta: {
     total_items: number;
@@ -15,13 +14,11 @@ export interface PaginatedResponse<T> {
   items: T[];
 }
 
-// Интерфейс для конфигурации сортировки
 export interface SortConfig {
   active: string;
   direction: 'asc' | 'desc';
 }
 
-// Интерфейс для конфигурации фильтрации
 export interface FilterConfig {
   searchName?: string;
   searchSurname?: string;
@@ -32,61 +29,40 @@ export interface FilterConfig {
   providedIn: 'root'
 })
 export class BaseService {
-  private baseUrl = 'http://localhost:8080/api';
-  private studentsUrl = `${this.baseUrl}/students`;
+  private apiUrl = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  // Получение списка студентов с пагинацией, сортировкой и фильтрацией
-  getStudentsPaginated(
-    page: number,
-    limit: number = 5,
-    sortConfig?: SortConfig,
-    filterConfig?: FilterConfig
-  ): Observable<PaginatedResponse<Student>> {
+  getStudentsPaginated(page: number, pageSize: number, sort?: SortConfig, filter?: FilterConfig): Observable<PaginatedResponse<Student>> {
     let params = new HttpParams()
       .set('page', page.toString())
-      .set('limit', limit.toString());
+      .set('limit', pageSize.toString());
 
-    // Добавление параметра сортировки
-    if (sortConfig && sortConfig.active) {
-      const sortBy = sortConfig.direction === 'desc' ? `-${sortConfig.active}` : sortConfig.active;
-      params = params.set('sortBy', sortBy);
+    if (sort && sort.active && sort.direction) {
+      const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
+      params = params.set('sortBy', sortParam);
     }
 
-    // Добавление параметров поиска
-    if (filterConfig?.searchName) {
-      params = params.set('name', `*${filterConfig.searchName}*`);
-    }
-    if (filterConfig?.searchSurname) {
-      params = params.set('surname', `*${filterConfig.searchSurname}*`);
+    if (filter?.searchName) {
+      params = params.set('name', filter.searchName);
     }
 
-    return this.http.get<PaginatedResponse<Student>>(this.studentsUrl, { params });
+    if (filter?.searchSurname) {
+      params = params.set('surname', filter.searchSurname);
+    }
+
+    return this.http.get<PaginatedResponse<Student>>(`${this.apiUrl}/students`, { params });
   }
 
-  // Добавление нового студента
   addNewStudent(student: Student): Observable<Student> {
-    // Отправляем только name и surname, так как другие поля на бэкенде заполняются автоматически
-    const requestBody = {
-      name: student.name,
-      surname: student.surname
-    };
-    return this.http.post<Student>(this.studentsUrl, requestBody);
+    return this.http.post<Student>(`${this.apiUrl}/students`, student);
   }
 
-  // Обновление данных студента
   updateStudent(student: Student): Observable<Student> {
-    // При обновлении также отправляем только name и surname
-    const requestBody = {
-      name: student.name,
-      surname: student.surname
-    };
-    return this.http.patch<Student>(`${this.studentsUrl}/${student.id}`, requestBody);
+    return this.http.put<Student>(`${this.apiUrl}/students/${student.id}`, student);
   }
 
-  // Удаление студента по ID
-  deleteStudent(id: number): Observable<any> {
-    return this.http.delete(`${this.studentsUrl}/${id}`);
+  deleteStudent(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/students/${id}`);
   }
 }

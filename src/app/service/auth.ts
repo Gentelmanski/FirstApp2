@@ -1,6 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, Subject, takeUntil } from 'rxjs';
+import { Observable, BehaviorSubject, tap, Subject } from 'rxjs';
 import { LoginRequest, LoginResponse, User, RegisterRequest } from '../models/user';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
@@ -40,13 +40,12 @@ export class AuthService {
       }
     } catch (error) {
       console.error('Error loading auth data from storage:', error);
-      this.clearAuthData();
+      this.clearStoredAuthData();
     }
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/login`, credentials).pipe(
-      takeUntil(this.logoutSubject),
       tap(response => {
         this.setAuthData(response.token, response.user);
       })
@@ -55,7 +54,6 @@ export class AuthService {
 
   register(data: RegisterRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/register`, data).pipe(
-      takeUntil(this.logoutSubject),
       tap(response => {
         this.setAuthData(response.token, response.user);
       })
@@ -66,25 +64,17 @@ export class AuthService {
     // Отправляем сигнал об отмене всех текущих запросов
     this.logoutSubject.next();
     
-    this.clearAuthData();
+    this.clearAllAuthData();
     
     // Принудительно перенаправляем на страницу логина
     this.router.navigate(['/login'], { 
       queryParams: { logout: true },
       replaceUrl: true
-    }).then(() => {
-      // После навигации принудительно перезагружаем страницу для очистки состояния
-      if (isPlatformBrowser(this.platformId)) {
-        // Только если не в режиме SSR
-        window.location.href = '/login?logout=true';
-      }
     });
   }
 
   getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/me`).pipe(
-      takeUntil(this.logoutSubject)
-    );
+    return this.http.get<User>(`${this.baseUrl}/me`);
   }
 
   refreshUserData(): void {
@@ -96,7 +86,7 @@ export class AuthService {
         }
       },
       error: () => {
-        this.logout();
+        this.clearAllAuthData();
       }
     });
   }
@@ -174,19 +164,32 @@ export class AuthService {
     this.currentUserSubject.next(user);
   }
 
-  private clearAuthData(): void {
+  // Сделал метод публичным
+  clearStoredAuthData(): void {
     if (isPlatformBrowser(this.platformId)) {
       try {
         localStorage.removeItem('token');
         localStorage.removeItem('currentUser');
-        // Очищаем sessionStorage и другие хранилища
         sessionStorage.clear();
       } catch (error) {
         console.error('Error clearing auth data from storage:', error);
       }
     }
-    
+  }
+
+  clearAuthState(): void {
     this.tokenSubject.next(null);
     this.currentUserSubject.next(null);
+    this.logoutSubject.next();
+  }
+
+  // Новый публичный метод для очистки всего
+  clearAllAuthData(): void {
+    this.clearAuthState();
+    this.clearStoredAuthData();
+  }
+
+  getLogoutSubject(): Subject<void> {
+    return this.logoutSubject;
   }
 }
