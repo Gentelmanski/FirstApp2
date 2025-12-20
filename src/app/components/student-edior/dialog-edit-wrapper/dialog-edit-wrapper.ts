@@ -24,15 +24,14 @@ import { CommonModule } from '@angular/common';
   styleUrl: './dialog-edit-wrapper.scss'
 })
 export class DialogEditWrapper {
-    editingStudent: Student; // Текущий редактируемый студент
+    editingStudent: Student;
 
     constructor(
-      public dialogRef: MatDialogRef<DialogEditWrapper>, // Референс на диалоговое окно
-      @Inject(MAT_DIALOG_DATA) public data: Student      // Данные, переданные в диалог (студент для редактирования или null)
+      public dialogRef: MatDialogRef<DialogEditWrapper>,
+      @Inject(MAT_DIALOG_DATA) public data: Student
     ) {
       // Создаем копию объекта студента для редактирования
-      // Если data есть - копируем его, иначе создаем нового студента
-      this.editingStudent = data ? Object.assign(new Student(), data) : new Student();
+      this.editingStudent = data ? { ...data } : new Student();
     }
 
     ngOnInit(): void {}

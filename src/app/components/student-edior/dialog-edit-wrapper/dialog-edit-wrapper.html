@@ -23,6 +23,15 @@
            placeholder="Введите фамилию">
     <mat-icon matSuffix>badge</mat-icon>
   </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Email студента</mat-label>
+    <input matInput
+           type="email"
+           [(ngModel)]="editingStudent.email"
+           placeholder="Введите email">
+    <mat-icon matSuffix>email</mat-icon>
+  </mat-form-field>
 </div>
 
 <div mat-dialog-actions align="end">
