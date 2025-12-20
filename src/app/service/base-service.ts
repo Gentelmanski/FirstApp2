@@ -67,12 +67,22 @@ export class BaseService {
 
   // Добавление нового студента
   addNewStudent(student: Student): Observable<Student> {
-    return this.http.post<Student>(this.studentsUrl, student);
+    // Отправляем только name и surname, так как другие поля на бэкенде заполняются автоматически
+    const requestBody = {
+      name: student.name,
+      surname: student.surname
+    };
+    return this.http.post<Student>(this.studentsUrl, requestBody);
   }
 
   // Обновление данных студента
   updateStudent(student: Student): Observable<Student> {
-    return this.http.patch<Student>(`${this.studentsUrl}/${student.id}`, student);
+    // При обновлении также отправляем только name и surname
+    const requestBody = {
+      name: student.name,
+      surname: student.surname
+    };
+    return this.http.patch<Student>(`${this.studentsUrl}/${student.id}`, requestBody);
   }
 
   // Удаление студента по ID
