@@ -110,14 +110,14 @@ export class MatTableStudents implements AfterViewInit, OnInit, OnDestroy {
   private updateDisplayedColumns(): void {
   const baseColumns = ['position', 'name', 'surname'];
   
-  // Email показываем всем ролям, включая студентов
+  // Email показываем всем ролям
   baseColumns.push('email');
   
   // Действия показываем всем ролям
   baseColumns.push('actions');
   
   this.displayedColumns = baseColumns;
-  }
+}
 
   canEditStudent(student: Student): boolean {
   return this.authService.canEditStudent(student.id || 0);

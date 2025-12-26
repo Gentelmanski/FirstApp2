@@ -29,7 +29,12 @@ export class RoleGuard implements CanActivate {
     
     if (!hasRole) {
       console.error('Недостаточно прав для доступа к этой странице');
-      this.router.navigate(['/']);
+      // Перенаправляем в зависимости от роли
+      if (user.role === 'admin') {
+        this.router.navigate(['/admin']);
+      } else {
+        this.router.navigate(['/']);
+      }
       return false;
     }
 

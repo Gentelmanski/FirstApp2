@@ -1,0 +1,63 @@
+<h1 mat-dialog-title>
+  <mat-icon>{{ editingTeacher.id ? 'edit' : 'person_add' }}</mat-icon>
+  {{ editingTeacher.id ? 'Редактировать преподавателя' : 'Добавить преподавателя' }}
+</h1>
+
+<div mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Имя преподавателя</mat-label>
+    <input matInput
+           type="text"
+           [(ngModel)]="editingTeacher.name"
+           required
+           placeholder="Введите имя">
+    <mat-icon matSuffix>person</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Фамилия преподавателя</mat-label>
+    <input matInput
+           type="text"
+           [(ngModel)]="editingTeacher.surname"
+           required
+           placeholder="Введите фамилию">
+    <mat-icon matSuffix>badge</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Email преподавателя</mat-label>
+    <input matInput
+           type="email"
+           [(ngModel)]="editingTeacher.email"
+           required
+           placeholder="Введите email">
+    <mat-icon matSuffix>email</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Телефон</mat-label>
+    <input matInput
+           type="tel"
+           [(ngModel)]="editingTeacher.phone"
+           placeholder="Введите телефон">
+    <mat-icon matSuffix>phone</mat-icon>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button
+          (click)="onNoClick()"
+          class="cancel-button">
+    <mat-icon>cancel</mat-icon>
+    Отмена
+  </button>
+
+  <button mat-button="filled"
+          color="primary"
+          [disabled]="!editingTeacher.name || !editingTeacher.surname || !editingTeacher.email"
+          [mat-dialog-close]="editingTeacher"
+          class="submit-button">
+    <mat-icon>{{ editingTeacher.id ? 'save' : 'add' }}</mat-icon>
+    {{ editingTeacher.id ? 'Сохранить' : 'Добавить' }}
+  </button>
+</div>

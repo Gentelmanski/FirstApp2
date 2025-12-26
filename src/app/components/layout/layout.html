@@ -1,42 +1,42 @@
-<div class="app-container">
-  <!-- Шапка с навигацией -->
-  <mat-toolbar color="primary" class="toolbar">
-    <mat-toolbar-row>
-      <span class="logo">
-        Student Management
-      </span>
-      
-      <span class="spacer"></span>
-      
-      <div *ngIf="currentUser" class="user-info">
-        <span class="user-email">{{ currentUser.email }}</span>
-        <span class="user-role">{{ userRoleLabel }}</span>
-        
-        <button mat-icon-button [matMenuTriggerFor]="userMenu">
-          <mat-icon>account_circle</mat-icon>
-        </button>
-        
-        <mat-menu #userMenu="matMenu">
-          <button mat-menu-item disabled>
-            <mat-icon>person</mat-icon>
-            <span>{{ currentUser.email }}</span>
-          </button>
-          <button mat-menu-item disabled>
-            <mat-icon>badge</mat-icon>
-            <span>{{ userRoleLabel }}</span>
-          </button>
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
-            <span>Выйти</span>
-          </button>
-        </mat-menu>
-      </div>
-    </mat-toolbar-row>
-  </mat-toolbar>
+<mat-toolbar color="primary">
+  <button mat-icon-button class="menu-button" (click)="sidenav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  
+  <span>Система управления учебным заведением</span>
+  
+  <span class="spacer"></span>
+  
+  <div class="user-info" *ngIf="authService.isAuthenticated()">
+    <span class="user-email">{{ currentUser?.email }}</span>
+    <span class="user-role" [ngClass]="currentUser?.role">
+      {{ currentUser?.role === 'admin' ? 'Администратор' : 
+         currentUser?.role === 'teacher' ? 'Преподаватель' : 'Студент' }}
+    </span>
+    <button mat-icon-button (click)="logout()" matTooltip="Выйти">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>
 
-  <!-- Основной контент -->
-  <main class="main-content">
+<mat-sidenav-container>
+  <mat-sidenav #sidenav mode="side" opened>
+    <mat-nav-list>
+      <!-- Для админов показываем ссылку на админ-панель -->
+      <a mat-list-item routerLink="/admin" routerLinkActive="active" *ngIf="authService.isAdmin()">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Админ-панель</span>
+      </a>
+      
+      <!-- Для всех показываем ссылку на студентов -->
+      <a mat-list-item routerLink="/" routerLinkActive="active">
+        <mat-icon>school</mat-icon>
+        <span>Студенты</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  
+  <mat-sidenav-content>
     <router-outlet></router-outlet>
-  </main>
-</div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

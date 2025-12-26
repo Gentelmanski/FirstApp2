@@ -1,0 +1,307 @@
+<div class="admin-dashboard">
+  <!-- Заголовок -->
+  <div class="header">
+    <h1>
+      <mat-icon>admin_panel_settings</mat-icon>
+      Административная панель
+    </h1>
+    <div class="user-info" *ngIf="currentUser">
+      <span class="role-badge admin">
+        Администратор
+      </span>
+      <span class="email">{{ currentUser.email }}</span>
+    </div>
+  </div>
+
+  <!-- Раздел студентов -->
+  <div class="section students-section">
+    <div class="section-header">
+      <h2>
+        <mat-icon>school</mat-icon>
+        Управление студентами
+      </h2>
+    </div>
+
+    <!-- Панель управления студентами -->
+    <div class="controls-panel">
+      <div class="search-controls">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по имени</mat-label>
+          <input matInput [(ngModel)]="searchStudentName" (ngModelChange)="onStudentsSearchChange()" 
+                 placeholder="Введите имя...">
+          <button mat-icon-button matSuffix *ngIf="searchStudentName" (click)="clearStudentsSearch('name')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchStudentName">search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по фамилии</mat-label>
+          <input matInput [(ngModel)]="searchStudentSurname" (ngModelChange)="onStudentsSearchChange()" 
+                 placeholder="Введите фамилию...">
+          <button mat-icon-button matSuffix *ngIf="searchStudentSurname" (click)="clearStudentsSearch('surname')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchStudentSurname">search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по email</mat-label>
+          <input matInput [(ngModel)]="searchStudentEmail" (ngModelChange)="onStudentsSearchChange()" 
+                 placeholder="Введите email...">
+          <button mat-icon-button matSuffix *ngIf="searchStudentEmail" (click)="clearStudentsSearch('email')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchStudentEmail">search</mat-icon>
+        </mat-form-field>
+
+        <button mat-button color="warn" (click)="clearAllStudentsSearch()" 
+                [disabled]="!searchStudentName && !searchStudentSurname && !searchStudentEmail">
+          <mat-icon>clear_all</mat-icon>
+          Очистить все
+        </button>
+      </div>
+
+      <div class="action-controls">
+        <button mat-raised-button color="primary" (click)="addNewStudent()">
+          <mat-icon>person_add</mat-icon>
+          Добавить студента
+        </button>
+      </div>
+    </div>
+
+    <!-- Таблица студентов -->
+    <div class="table-container">
+      <div class="loading-overlay" *ngIf="isLoadingStudents">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Загрузка данных студентов...</p>
+      </div>
+
+      <div class="error-message" *ngIf="studentsError && !isLoadingStudents">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ studentsError }}</span>
+      </div>
+
+      <div class="mat-elevation-z8 table-wrapper" *ngIf="!isLoadingStudents && !studentsError">
+        <table mat-table [dataSource]="studentsDataSource" matSort #studentsSort class="students-table">
+          <!-- Порядковый номер -->
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef> № </th>
+            <td mat-cell *matCellDef="let element; let i = index">
+              {{ getStudentsDisplayedIndex(i) }}
+            </td>
+          </ng-container>
+
+          <!-- Имя -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Имя </th>
+            <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+          </ng-container>
+
+          <!-- Фамилия -->
+          <ng-container matColumnDef="surname">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Фамилия </th>
+            <td mat-cell *matCellDef="let element"> {{ element.surname }} </td>
+          </ng-container>
+
+          <!-- Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let element"> 
+              {{ element.email || '—' }}
+            </td>
+          </ng-container>
+
+          <!-- Действия -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-header"> Действия </th>
+            <td mat-cell *matCellDef="let element" class="actions-cell">
+              <button mat-icon-button color="primary" 
+                      (click)="editStudent(element)"
+                      matTooltip="Редактировать">
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button mat-icon-button color="warn" 
+                      (click)="deleteStudent(element)"
+                      matTooltip="Удалить">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="studentsDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: studentsDisplayedColumns;"></tr>
+
+          <tr class="no-data-row" *matNoDataRow>
+            <td [attr.colspan]="studentsDisplayedColumns.length">
+              <div class="no-data-message">
+                <mat-icon>info</mat-icon>
+                <span>Нет данных для отображения</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator #studentsPaginator [length]="studentsTotalItems"
+                       [pageSize]="studentsPageSize"
+                       [pageSizeOptions]="[5, 10, 25, 100]"
+                       [pageIndex]="studentsCurrentPage"
+                       (page)="onStudentsPageChange($event)"
+                       aria-label="Select page of students"
+                       showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+
+  <!-- Раздел преподавателей -->
+  <div class="section teachers-section">
+    <div class="section-header">
+      <h2>
+        <mat-icon>people</mat-icon>
+        Управление преподавателями
+      </h2>
+    </div>
+
+    <!-- Панель управления преподавателями -->
+    <div class="controls-panel">
+      <div class="search-controls">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по имени</mat-label>
+          <input matInput [(ngModel)]="searchTeacherName" (ngModelChange)="onTeachersSearchChange()" 
+                 placeholder="Введите имя...">
+          <button mat-icon-button matSuffix *ngIf="searchTeacherName" (click)="clearTeachersSearch('name')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchTeacherName">search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по фамилии</mat-label>
+          <input matInput [(ngModel)]="searchTeacherSurname" (ngModelChange)="onTeachersSearchChange()" 
+                 placeholder="Введите фамилию...">
+          <button mat-icon-button matSuffix *ngIf="searchTeacherSurname" (click)="clearTeachersSearch('surname')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchTeacherSurname">search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по email</mat-label>
+          <input matInput [(ngModel)]="searchTeacherEmail" (ngModelChange)="onTeachersSearchChange()" 
+                 placeholder="Введите email...">
+          <button mat-icon-button matSuffix *ngIf="searchTeacherEmail" (click)="clearTeachersSearch('email')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchTeacherEmail">search</mat-icon>
+        </mat-form-field>
+
+        <button mat-button color="warn" (click)="clearAllTeachersSearch()" 
+                [disabled]="!searchTeacherName && !searchTeacherSurname && !searchTeacherEmail">
+          <mat-icon>clear_all</mat-icon>
+          Очистить все
+        </button>
+      </div>
+
+      <div class="action-controls">
+        <button mat-raised-button color="primary" (click)="addNewTeacher()">
+          <mat-icon>person_add</mat-icon>
+          Добавить преподавателя
+        </button>
+      </div>
+    </div>
+
+    <!-- Таблица преподавателей -->
+    <div class="table-container">
+      <div class="loading-overlay" *ngIf="isLoadingTeachers">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Загрузка данных преподавателей...</p>
+      </div>
+
+      <div class="error-message" *ngIf="teachersError && !isLoadingTeachers">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ teachersError }}</span>
+      </div>
+
+      <div class="mat-elevation-z8 table-wrapper" *ngIf="!isLoadingTeachers && !teachersError">
+        <table mat-table [dataSource]="teachersDataSource" matSort #teachersSort class="teachers-table">
+          <!-- Порядковый номер -->
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef> № </th>
+            <td mat-cell *matCellDef="let element; let i = index">
+              {{ getTeachersDisplayedIndex(i) }}
+            </td>
+          </ng-container>
+
+          <!-- Имя -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Имя </th>
+            <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+          </ng-container>
+
+          <!-- Фамилия -->
+          <ng-container matColumnDef="surname">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Фамилия </th>
+            <td mat-cell *matCellDef="let element"> {{ element.surname }} </td>
+          </ng-container>
+
+          <!-- Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+            <td mat-cell *matCellDef="let element"> 
+              {{ element.email || '—' }}
+            </td>
+          </ng-container>
+
+          <!-- Телефон -->
+          <ng-container matColumnDef="phone">
+            <th mat-header-cell *matHeaderCellDef> Телефон </th>
+            <td mat-cell *matCellDef="let element"> 
+              {{ element.phone || '—' }}
+            </td>
+          </ng-container>
+
+          <!-- Действия -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-header"> Действия </th>
+            <td mat-cell *matCellDef="let element" class="actions-cell">
+              <button mat-icon-button color="primary" 
+                      (click)="editTeacher(element)"
+                      matTooltip="Редактировать">
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button mat-icon-button color="warn" 
+                      (click)="deleteTeacher(element)"
+                      matTooltip="Удалить">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="teachersDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: teachersDisplayedColumns;"></tr>
+
+          <tr class="no-data-row" *matNoDataRow>
+            <td [attr.colspan]="teachersDisplayedColumns.length">
+              <div class="no-data-message">
+                <mat-icon>info</mat-icon>
+                <span>Нет данных для отображения</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator #teachersPaginator [length]="teachersTotalItems"
+                       [pageSize]="teachersPageSize"
+                       [pageSizeOptions]="[5, 10, 25, 100]"
+                       [pageIndex]="teachersCurrentPage"
+                       (page)="onTeachersPageChange($event)"
+                       aria-label="Select page of teachers"
+                       showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

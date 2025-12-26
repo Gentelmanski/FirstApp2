@@ -1,10 +1,17 @@
-export interface Teacher {
-  id: number;
+export class Teacher {
+  id?: number;
   name: string;
   surname: string;
   email: string;
   phone?: string;
   user_id?: number;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
+
+  constructor() {
+    this.name = '';
+    this.surname = '';
+    this.email = '';
+    this.phone = '';
+  }
 }

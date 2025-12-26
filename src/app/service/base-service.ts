@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Student } from '../models/student';
+import { Teacher } from '../models/teacher';
 
 export interface PaginatedResponse<T> {
   meta: {
@@ -33,44 +34,43 @@ export class BaseService {
 
   constructor(private http: HttpClient) {}
 
+  // Студенты
   getStudentsPaginated(page: number, pageSize: number, sort?: SortConfig, filter?: FilterConfig): Observable<PaginatedResponse<Student>> {
-  let params = new HttpParams()
-    .set('page', page.toString())
-    .set('limit', pageSize.toString());
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', pageSize.toString());
 
-  if (sort && sort.active && sort.direction) {
-    const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
-    params = params.set('sortBy', sortParam);
+    if (sort && sort.active && sort.direction) {
+      const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
+      params = params.set('sortBy', sortParam);
+    }
+
+    if (filter?.searchName) {
+      params = params.set('name', filter.searchName);
+    }
+
+    if (filter?.searchSurname) {
+      params = params.set('surname', filter.searchSurname);
+    }
+
+    if (filter?.searchEmail) {
+      params = params.set('email', filter.searchEmail);
+    }
+
+    return this.http.get<PaginatedResponse<Student>>(`${this.apiUrl}/students`, { params });
   }
-
-  if (filter?.searchName) {
-    params = params.set('name', filter.searchName);
-  }
-
-  if (filter?.searchSurname) {
-    params = params.set('surname', filter.searchSurname);
-  }
-
-  if (filter?.searchEmail) {
-    params = params.set('email', filter.searchEmail);
-  }
-
-  return this.http.get<PaginatedResponse<Student>>(`${this.apiUrl}/students`, { params });
-}
 
   addNewStudent(student: Student): Observable<Student> {
-    // Преобразуем студента в формат, который ожидает сервер
     const studentToSend = {
       name: student.name,
       surname: student.surname,
-      email: student.email || '' // Убедимся, что email не undefined
+      email: student.email || ''
     };
     
     return this.http.post<Student>(`${this.apiUrl}/students`, studentToSend);
   }
 
   updateStudent(student: Student): Observable<Student> {
-    // Преобразуем студента в формат, который ожидает сервер
     const studentToSend = {
       name: student.name,
       surname: student.surname,
@@ -82,5 +82,57 @@ export class BaseService {
 
   deleteStudent(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/students/${id}`);
+  }
+
+  // Преподаватели
+  getTeachersPaginated(page: number, pageSize: number, sort?: SortConfig, filter?: FilterConfig): Observable<PaginatedResponse<Teacher>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', pageSize.toString());
+
+    if (sort && sort.active && sort.direction) {
+      const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
+      params = params.set('sortBy', sortParam);
+    }
+
+    if (filter?.searchName) {
+      params = params.set('name', filter.searchName);
+    }
+
+    if (filter?.searchSurname) {
+      params = params.set('surname', filter.searchSurname);
+    }
+
+    if (filter?.searchEmail) {
+      params = params.set('email', filter.searchEmail);
+    }
+
+    return this.http.get<PaginatedResponse<Teacher>>(`${this.apiUrl}/teachers`, { params });
+  }
+
+  addNewTeacher(teacher: Teacher): Observable<Teacher> {
+    const teacherToSend = {
+      name: teacher.name,
+      surname: teacher.surname,
+      email: teacher.email,
+      phone: teacher.phone || ''
+    };
+    
+    return this.http.post<Teacher>(`${this.apiUrl}/teachers`, teacherToSend);
+  }
+
+  updateTeacher(teacher: Teacher): Observable<Teacher> {
+    const teacherToSend = {
+      name: teacher.name,
+      surname: teacher.surname,
+      email: teacher.email,
+      phone: teacher.phone || ''
+    };
+    
+    return this.http.put<Teacher>(`${this.apiUrl}/teachers/${teacher.id}`, teacherToSend);
+  }
+
+  deleteTeacher(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/teachers/${id}`);
   }
 }
