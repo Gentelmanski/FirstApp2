@@ -82,8 +82,8 @@
         <span>{{ studentsError }}</span>
       </div>
 
-      <div class="mat-elevation-z8 table-wrapper" *ngIf="!isLoadingStudents && !studentsError">
-        <table mat-table [dataSource]="studentsDataSource" matSort #studentsSort class="students-table">
+      <div class="table-wrapper" *ngIf="!isLoadingStudents && !studentsError">
+        <table mat-table [dataSource]="studentsDataSource" matSort #studentsSort class="unified-table">
           <!-- Порядковый номер -->
           <ng-container matColumnDef="position">
             <th mat-header-cell *matHeaderCellDef> № </th>
@@ -106,7 +106,7 @@
 
           <!-- Email -->
           <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
             <td mat-cell *matCellDef="let element"> 
               {{ element.email || '—' }}
             </td>
@@ -118,13 +118,15 @@
             <td mat-cell *matCellDef="let element" class="actions-cell">
               <button mat-icon-button color="primary" 
                       (click)="editStudent(element)"
-                      matTooltip="Редактировать">
+                      matTooltip="Редактировать"
+                      class="action-button edit-button">
                 <mat-icon>edit</mat-icon>
               </button>
 
               <button mat-icon-button color="warn" 
                       (click)="deleteStudent(element)"
-                      matTooltip="Удалить">
+                      matTooltip="Удалить"
+                      class="action-button delete-button">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -149,7 +151,8 @@
                        [pageIndex]="studentsCurrentPage"
                        (page)="onStudentsPageChange($event)"
                        aria-label="Select page of students"
-                       showFirstLastButtons>
+                       showFirstLastButtons
+                       class="unified-paginator">
         </mat-paginator>
       </div>
     </div>
@@ -224,8 +227,8 @@
         <span>{{ teachersError }}</span>
       </div>
 
-      <div class="mat-elevation-z8 table-wrapper" *ngIf="!isLoadingTeachers && !teachersError">
-        <table mat-table [dataSource]="teachersDataSource" matSort #teachersSort class="teachers-table">
+      <div class="table-wrapper" *ngIf="!isLoadingTeachers && !teachersError">
+        <table mat-table [dataSource]="teachersDataSource" matSort #teachersSort class="unified-table">
           <!-- Порядковый номер -->
           <ng-container matColumnDef="position">
             <th mat-header-cell *matHeaderCellDef> № </th>
@@ -268,13 +271,15 @@
             <td mat-cell *matCellDef="let element" class="actions-cell">
               <button mat-icon-button color="primary" 
                       (click)="editTeacher(element)"
-                      matTooltip="Редактировать">
+                      matTooltip="Редактировать"
+                      class="action-button edit-button">
                 <mat-icon>edit</mat-icon>
               </button>
 
               <button mat-icon-button color="warn" 
                       (click)="deleteTeacher(element)"
-                      matTooltip="Удалить">
+                      matTooltip="Удалить"
+                      class="action-button delete-button">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -299,135 +304,139 @@
                        [pageIndex]="teachersCurrentPage"
                        (page)="onTeachersPageChange($event)"
                        aria-label="Select page of teachers"
-                       showFirstLastButtons>
+                       showFirstLastButtons
+                       class="unified-paginator">
         </mat-paginator>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Раздел групп -->
-<div class="section groups-section">
-  <div class="section-header">
-    <h2>
-      <mat-icon>groups</mat-icon>
-      Управление группами
-    </h2>
-  </div>
+  <!-- Раздел групп -->
+  <div class="section groups-section">
+    <div class="section-header">
+      <h2>
+        <mat-icon>groups</mat-icon>
+        Управление группами
+      </h2>
+    </div>
 
-  <!-- Панель управления группами -->
-  <div class="controls-panel">
-    <div class="search-controls">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Поиск по названию</mat-label>
-        <input matInput [(ngModel)]="searchGroupName" (ngModelChange)="onGroupsSearchChange()" 
-               placeholder="Введите название...">
-        <button mat-icon-button matSuffix *ngIf="searchGroupName" (click)="clearGroupsSearch('name')">
-          <mat-icon>close</mat-icon>
+    <!-- Панель управления группами -->
+    <div class="controls-panel">
+      <div class="search-controls">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по названию</mat-label>
+          <input matInput [(ngModel)]="searchGroupName" (ngModelChange)="onGroupsSearchChange()" 
+                 placeholder="Введите название...">
+          <button mat-icon-button matSuffix *ngIf="searchGroupName" (click)="clearGroupsSearch('name')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchGroupName">search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Поиск по коду</mat-label>
+          <input matInput [(ngModel)]="searchGroupCode" (ngModelChange)="onGroupsSearchChange()" 
+                 placeholder="Введите код...">
+          <button mat-icon-button matSuffix *ngIf="searchGroupCode" (click)="clearGroupsSearch('code')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix *ngIf="!searchGroupCode">search</mat-icon>
+        </mat-form-field>
+
+        <button mat-button color="warn" (click)="clearAllGroupsSearch()" 
+                [disabled]="!searchGroupName && !searchGroupCode">
+          <mat-icon>clear_all</mat-icon>
+          Очистить все
         </button>
-        <mat-icon matSuffix *ngIf="!searchGroupName">search</mat-icon>
-      </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Поиск по коду</mat-label>
-        <input matInput [(ngModel)]="searchGroupCode" (ngModelChange)="onGroupsSearchChange()" 
-               placeholder="Введите код...">
-        <button mat-icon-button matSuffix *ngIf="searchGroupCode" (click)="clearGroupsSearch('code')">
-          <mat-icon>close</mat-icon>
+      <div class="action-controls">
+        <button mat-raised-button color="primary" (click)="addNewGroup()">
+          <mat-icon>group_add</mat-icon>
+          Добавить группу
         </button>
-        <mat-icon matSuffix *ngIf="!searchGroupCode">search</mat-icon>
-      </mat-form-field>
-
-      <button mat-button color="warn" (click)="clearAllGroupsSearch()" 
-              [disabled]="!searchGroupName && !searchGroupCode">
-        <mat-icon>clear_all</mat-icon>
-        Очистить все
-      </button>
+      </div>
     </div>
 
-    <div class="action-controls">
-      <button mat-raised-button color="primary" (click)="addNewGroup()">
-        <mat-icon>group_add</mat-icon>
-        Добавить группу
-      </button>
-    </div>
-  </div>
+    <!-- Таблица групп -->
+    <div class="table-container">
+      <div class="loading-overlay" *ngIf="isLoadingGroups">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Загрузка данных групп...</p>
+      </div>
 
-  <!-- Таблица групп -->
-  <div class="table-container">
-    <div class="loading-overlay" *ngIf="isLoadingGroups">
-      <mat-spinner diameter="50"></mat-spinner>
-      <p>Загрузка данных групп...</p>
-    </div>
+      <div class="error-message" *ngIf="groupsError && !isLoadingGroups">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ groupsError }}</span>
+      </div>
 
-    <div class="error-message" *ngIf="groupsError && !isLoadingGroups">
-      <mat-icon color="warn">error</mat-icon>
-      <span>{{ groupsError }}</span>
-    </div>
+      <div class="table-wrapper" *ngIf="!isLoadingGroups && !groupsError">
+        <table mat-table [dataSource]="groupsDataSource" matSort #groupsSort class="unified-table">
+          <!-- Порядковый номер -->
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef> № </th>
+            <td mat-cell *matCellDef="let element; let i = index">
+              {{ getGroupsDisplayedIndex(i) }}
+            </td>
+          </ng-container>
 
-    <div class="mat-elevation-z8 table-wrapper" *ngIf="!isLoadingGroups && !groupsError">
-      <table mat-table [dataSource]="groupsDataSource" matSort #groupsSort class="groups-table">
-        <!-- Порядковый номер -->
-        <ng-container matColumnDef="position">
-          <th mat-header-cell *matHeaderCellDef> № </th>
-          <td mat-cell *matCellDef="let element; let i = index">
-            {{ getGroupsDisplayedIndex(i) }}
-          </td>
-        </ng-container>
+          <!-- Название -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Название </th>
+            <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+          </ng-container>
 
-        <!-- Название -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Название </th>
-          <td mat-cell *matCellDef="let element"> {{ element.name }} </td>
-        </ng-container>
+          <!-- Код -->
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Код </th>
+            <td mat-cell *matCellDef="let element"> 
+              {{ element.code || '—' }}
+            </td>
+          </ng-container>
 
-        <!-- Код -->
-        <ng-container matColumnDef="code">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Код </th>
-          <td mat-cell *matCellDef="let element"> 
-            {{ element.code || '—' }}
-          </td>
-        </ng-container>
+          <!-- Действия -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-header"> Действия </th>
+            <td mat-cell *matCellDef="let element" class="actions-cell">
+              <button mat-icon-button color="primary" 
+                      (click)="editGroup(element)"
+                      matTooltip="Редактировать"
+                      class="action-button edit-button">
+                <mat-icon>edit</mat-icon>
+              </button>
 
-        <!-- Действия -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="actions-header"> Действия </th>
-          <td mat-cell *matCellDef="let element" class="actions-cell">
-            <button mat-icon-button color="primary" 
-                    (click)="editGroup(element)"
-                    matTooltip="Редактировать">
-              <mat-icon>edit</mat-icon>
-            </button>
+              <button mat-icon-button color="warn" 
+                      (click)="deleteGroup(element)"
+                      matTooltip="Удалить"
+                      class="action-button delete-button">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
 
-            <button mat-icon-button color="warn" 
-                    (click)="deleteGroup(element)"
-                    matTooltip="Удалить">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="groupsDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: groupsDisplayedColumns;"></tr>
 
-        <tr mat-header-row *matHeaderRowDef="groupsDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: groupsDisplayedColumns;"></tr>
+          <tr class="no-data-row" *matNoDataRow>
+            <td [attr.colspan]="groupsDisplayedColumns.length">
+              <div class="no-data-message">
+                <mat-icon>info</mat-icon>
+                <span>Нет данных для отображения</span>
+              </div>
+            </td>
+          </tr>
+        </table>
 
-        <tr class="no-data-row" *matNoDataRow>
-          <td [attr.colspan]="groupsDisplayedColumns.length">
-            <div class="no-data-message">
-              <mat-icon>info</mat-icon>
-              <span>Нет данных для отображения</span>
-            </div>
-          </td>
-        </tr>
-      </table>
-
-      <mat-paginator #groupsPaginator [length]="groupsTotalItems"
-                     [pageSize]="groupsPageSize"
-                     [pageSizeOptions]="[5, 10, 25, 100]"
-                     [pageIndex]="groupsCurrentPage"
-                     (page)="onGroupsPageChange($event)"
-                     aria-label="Select page of groups"
-                     showFirstLastButtons>
-      </mat-paginator>
+        <mat-paginator #groupsPaginator [length]="groupsTotalItems"
+                       [pageSize]="groupsPageSize"
+                       [pageSizeOptions]="[5, 10, 25, 100]"
+                       [pageIndex]="groupsCurrentPage"
+                       (page)="onGroupsPageChange($event)"
+                       aria-label="Select page of groups"
+                       showFirstLastButtons
+                       class="unified-paginator">
+        </mat-paginator>
+      </div>
     </div>
   </div>
 </div>
