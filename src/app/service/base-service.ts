@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Student } from '../models/student';
 import { Teacher } from '../models/teacher';
+import { Group } from '../models/groups';
 
 export interface PaginatedResponse<T> {
   meta: {
@@ -135,4 +136,48 @@ export class BaseService {
   deleteTeacher(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/teachers/${id}`);
   }
+
+  getGroupsPaginated(page: number, pageSize: number, sort?: SortConfig, filter?: FilterConfig): Observable<PaginatedResponse<Group>> {
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('limit', pageSize.toString());
+
+  if (sort && sort.active && sort.direction) {
+    const sortParam = sort.direction === 'desc' ? `-${sort.active}` : sort.active;
+    params = params.set('sortBy', sortParam);
+  }
+
+  if (filter?.searchName) {
+    params = params.set('name', filter.searchName);
+  }
+
+  // if (filter?.searchCode) {
+  //   params = params.set('code', filter.searchCode);
+  // }
+
+  return this.http.get<PaginatedResponse<Group>>(`${this.apiUrl}/groups`, { params });
+}
+
+addNewGroup(group: Group): Observable<Group> {
+  const groupToSend = {
+    name: group.name,
+    code: group.code
+  };
+  
+  return this.http.post<Group>(`${this.apiUrl}/groups`, groupToSend);
+}
+
+updateGroup(group: Group): Observable<Group> {
+  const groupToSend = {
+    name: group.name,
+    code: group.code
+  };
+  
+  return this.http.put<Group>(`${this.apiUrl}/groups/${group.id}`, groupToSend);
+}
+
+deleteGroup(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.apiUrl}/groups/${id}`);
+}
+
 }

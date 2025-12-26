@@ -1,0 +1,44 @@
+<h1 mat-dialog-title>
+  <mat-icon>{{ editingGroup.id ? 'edit' : 'group_add' }}</mat-icon>
+  {{ editingGroup.id ? 'Редактировать группу' : 'Добавить группу' }}
+</h1>
+
+<div mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Название группы</mat-label>
+    <input matInput
+           type="text"
+           [(ngModel)]="editingGroup.name"
+           required
+           placeholder="Введите название группы">
+    <mat-icon matSuffix>group</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width-input">
+    <mat-label>Код группы</mat-label>
+    <input matInput
+           type="text"
+           [(ngModel)]="editingGroup.code"
+           required
+           placeholder="Введите код группы">
+    <mat-icon matSuffix>code</mat-icon>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button
+          (click)="onNoClick()"
+          class="cancel-button">
+    <mat-icon>cancel</mat-icon>
+    Отмена
+  </button>
+
+  <button mat-button="filled"
+          color="primary"
+          [disabled]="!editingGroup.name || !editingGroup.code"
+          [mat-dialog-close]="editingGroup"
+          class="submit-button">
+    <mat-icon>{{ editingGroup.id ? 'save' : 'add' }}</mat-icon>
+    {{ editingGroup.id ? 'Сохранить' : 'Добавить' }}
+  </button>
+</div>

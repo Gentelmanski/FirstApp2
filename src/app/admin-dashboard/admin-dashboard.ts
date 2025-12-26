@@ -20,6 +20,8 @@ import { DialogEditWrapper } from '../components/student-edior/dialog-edit-wrapp
 import { DialogEditWrapperTeacher } from '../components/dialog-edit-wrapper-teacher/dialog-edit-wrapper-teacher';
 import { Subject, takeUntil } from 'rxjs';
 import { RouterModule } from '@angular/router';
+import { Group } from '../models/groups';
+import { DialogEditWrapperGroup } from '../components/dialog-edit-wrapper-group/dialog-edit-wrapper-group';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -68,6 +70,21 @@ export class AdminDashboard implements AfterViewInit, OnInit, OnDestroy {
   searchTeacherPhone: string = '';
   isLoadingTeachers: boolean = false;
   teachersError: string | null = null;
+
+  // Для групп
+  groupsDisplayedColumns: string[] = ['position', 'name', 'code', 'actions'];
+  groupsDataSource = new MatTableDataSource<Group>();
+  groupsTotalItems = 0;
+  groupsPageSize = 5;
+  groupsCurrentPage = 0;
+  groupsCurrentSort: SortConfig | undefined = undefined;
+  searchGroupName: string = '';
+  searchGroupCode: string = '';
+  isLoadingGroups: boolean = false;
+  groupsError: string | null = null;
+
+  @ViewChild('groupsPaginator') groupsPaginator!: MatPaginator;
+  @ViewChild('groupsSort') groupsSort!: MatSort;
 
   @ViewChild('studentsPaginator') studentsPaginator!: MatPaginator;
   @ViewChild('studentsSort') studentsSort!: MatSort;
@@ -130,6 +147,21 @@ export class AdminDashboard implements AfterViewInit, OnInit, OnDestroy {
         }
         this.loadTeachers();
       });
+
+    this.groupsSort.sortChange
+  .pipe(takeUntil(this.destroy$))
+  .subscribe((sort: Sort) => {
+    this.groupsCurrentPage = 0;
+    if (sort.direction) {
+      this.groupsCurrentSort = {
+        active: sort.active,
+        direction: sort.direction as 'asc' | 'desc'
+      };
+    } else {
+      this.groupsCurrentSort = undefined;
+    }
+    this.loadGroups();
+  });  
   }
 
   ngOnDestroy() {
@@ -446,6 +478,7 @@ export class AdminDashboard implements AfterViewInit, OnInit, OnDestroy {
   private clearTableData(): void {
     this.clearStudentsTableData();
     this.clearTeachersTableData();
+    this.clearGroupsTableData();
   }
 
   private showError(message: string): void {
@@ -461,4 +494,154 @@ export class AdminDashboard implements AfterViewInit, OnInit, OnDestroy {
       panelClass: ['success-snackbar']
     });
   }
+
+  // Методы для групп
+onGroupsSearchChange(): void {
+  this.groupsCurrentPage = 0;
+  this.loadGroups();
+}
+
+clearGroupsSearch(field: 'name' | 'code'): void {
+  switch (field) {
+    case 'name': this.searchGroupName = ''; break;
+    case 'code': this.searchGroupCode = ''; break;
+  }
+  this.groupsCurrentPage = 0;
+  this.loadGroups();
+}
+
+clearAllGroupsSearch(): void {
+  this.searchGroupName = '';
+  this.searchGroupCode = '';
+  this.groupsCurrentPage = 0;
+  this.loadGroups();
+}
+
+loadGroups() {
+  if (!this.authService.isAuthenticated()) {
+    this.clearGroupsTableData();
+    return;
+  }
+
+  this.isLoadingGroups = true;
+  this.groupsError = null;
+
+  const pageNumber = this.groupsCurrentPage + 1;
+  const filterConfig: FilterConfig = {};
+  
+  if (this.searchGroupName) filterConfig.searchName = this.searchGroupName;
+  //if (this.searchGroupCode) filterConfig.searchCode = this.searchGroupCode;
+
+  this.baseService.getGroupsPaginated(pageNumber, this.groupsPageSize, this.groupsCurrentSort, filterConfig)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: PaginatedResponse<Group>) => {
+        this.groupsDataSource.data = response.items;
+        this.groupsTotalItems = response.meta.total_items;
+        this.isLoadingGroups = false;
+      },
+      error: (error) => {
+        if (error.status === 401) {
+          this.clearGroupsTableData();
+        } else {
+          this.groupsError = "Ошибка загрузки групп";
+          this.showError(error.error?.error || 'Ошибка загрузки данных групп');
+        }
+        this.isLoadingGroups = false;
+      }
+    });
+}
+
+onGroupsPageChange(event: PageEvent) {
+  this.groupsCurrentPage = event.pageIndex;
+  this.groupsPageSize = event.pageSize;
+  this.loadGroups();
+}
+
+getGroupsDisplayedIndex(index: number): number {
+  return this.groupsCurrentPage * this.groupsPageSize + index + 1;
+}
+
+addNewGroup() {
+  const dialogAddingNewGroup = this.dialog.open(DialogEditWrapperGroup, {
+    width: '400px',
+    data: null
+  });
+
+  dialogAddingNewGroup.afterClosed()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((result: Group) => {
+      if (result && result.name && result.code) {
+        this.isLoadingGroups = true;
+        this.baseService.addNewGroup(result)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              this.showSuccess('Группа успешно добавлена');
+              this.loadGroups();
+            },
+            error: (error) => {
+              this.isLoadingGroups = false;
+              this.showError(error.error?.error || 'Ошибка добавления группы');
+            }
+          });
+      }
+    });
+}
+
+editGroup(group: Group) {
+  const dialogEditGroup = this.dialog.open(DialogEditWrapperGroup, {
+    width: '400px',
+    data: group
+  });
+
+  dialogEditGroup.afterClosed()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((result: Group) => {
+      if (result && result.id !== null && result.id !== undefined && result.name && result.code) {
+        this.isLoadingGroups = true;
+        this.baseService.updateGroup(result)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.showSuccess('Данные группы обновлены');
+              this.loadGroups();
+            },
+            error: (error) => {
+              this.isLoadingGroups = false;
+              this.showError(error.error?.error || 'Ошибка обновления группы');
+            }
+          });
+      }
+    });
+}
+
+deleteGroup(group: Group) {
+  if (group.id !== null && group.id !== undefined && 
+      confirm(`Удалить группу ${group.name} (${group.code})?`)) {
+    this.isLoadingGroups = true;
+    this.baseService.deleteGroup(group.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.showSuccess('Группа успешно удалена');
+          this.loadGroups();
+        },
+        error: (error) => {
+          this.isLoadingGroups = false;
+          this.showError(error.error?.error || 'Ошибка удаления группы');
+        }
+      });
+  }
+}
+
+private clearGroupsTableData(): void {
+  this.groupsDataSource.data = [];
+  this.groupsTotalItems = 0;
+  this.groupsCurrentPage = 0;
+  if (this.groupsPaginator) {
+    this.groupsPaginator.firstPage();
+  }
+}
+
 }

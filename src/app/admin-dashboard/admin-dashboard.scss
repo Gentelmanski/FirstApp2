@@ -337,3 +337,23 @@ mat-paginator {
     }
   }
 }
+
+// Добавьте в стили для секций
+.groups-section {
+  border-top: 4px solid #ff9800;
+}
+
+// Стили для таблицы групп
+.groups-table {
+  mat-icon[matSuffix] {
+    color: #ff9800;
+  }
+
+  button[color="primary"] {
+    color: #ff9800;
+  }
+
+  button[color="warn"] {
+    color: #d32f2f;
+  }
+}
