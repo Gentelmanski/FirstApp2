@@ -25,6 +25,7 @@ export interface FilterConfig {
   searchName?: string;
   searchSurname?: string;
   searchEmail?: string;
+  searchCode?: string;
 }
 
 @Injectable({
@@ -151,9 +152,9 @@ export class BaseService {
     params = params.set('name', filter.searchName);
   }
 
-  // if (filter?.searchCode) {
-  //   params = params.set('code', filter.searchCode);
-  // }
+  if (filter?.searchCode) { 
+    params = params.set('code', filter.searchCode);
+  }
 
   return this.http.get<PaginatedResponse<Group>>(`${this.apiUrl}/groups`, { params });
 }
