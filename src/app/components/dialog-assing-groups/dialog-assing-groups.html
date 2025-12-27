@@ -1,0 +1,97 @@
+<h1 mat-dialog-title>
+  <mat-icon>group_add</mat-icon>
+  Назначение групп преподавателю
+</h1>
+
+<div mat-dialog-content class="dialog-content">
+  <div class="teacher-info">
+    <div class="info-row">
+      <mat-icon>person</mat-icon>
+      <span class="teacher-name">{{ data.teacher.name }} {{ data.teacher.surname }}</span>
+    </div>
+    <div class="info-row">
+      <mat-icon>email</mat-icon>
+      <span class="teacher-email">{{ data.teacher.email }}</span>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="groups-section">
+    <h3>
+      <mat-icon>groups</mat-icon>
+      Выбор групп
+    </h3>
+    
+    <mat-form-field appearance="outline" class="full-width-input">
+      <mat-label>Поиск групп</mat-label>
+      <input matInput 
+             [(ngModel)]="searchQuery"
+             (ngModelChange)="filterGroups()"
+             placeholder="Введите название или код группы...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="groups-list">
+      <div class="group-item" *ngFor="let group of filteredGroups">
+        <mat-checkbox [(ngModel)]="selectedGroups[group.id || 0]"  
+                      color="primary"
+                      (change)="onGroupSelectionChange(group)">
+          <div class="group-info">
+            <span class="group-name">{{ group.name }}</span>
+            <span class="group-code">{{ group.code }}</span>
+            <span class="group-stats" *ngIf="group.students">
+              <span class="group-stats" *ngIf="group.students && group.students.length > 0">
+  {{ group.students.length }} студентов
+</span>
+            </span>
+          </div>
+        </mat-checkbox>
+      </div>
+      
+      <div class="no-groups" *ngIf="filteredGroups.length === 0">
+        <mat-icon>group_off</mat-icon>
+        <p>Группы не найдены</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="selected-groups-section" *ngIf="getSelectedGroupsCount() > 0">
+    <mat-divider></mat-divider>
+    
+    <h3>
+      <mat-icon>check_circle</mat-icon>
+      Выбранные группы ({{ getSelectedGroupsCount() }})
+    </h3>
+    
+    <div class="selected-groups">
+      <mat-chip-listbox>
+        <mat-chip *ngFor="let group of getSelectedGroupsList()" 
+                  color="primary" 
+                  removable 
+                  (removed)="removeGroup(group)">
+          {{ group.name }} ({{ group.code }})
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip>
+      </mat-chip-listbox>
+    </div>
+  </div>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button
+          (click)="onCancel()"
+          class="cancel-button">
+    <mat-icon>cancel</mat-icon>
+    Отмена
+  </button>
+
+  <button mat-raised-button
+          color="primary"
+          [disabled]="!hasChanges()"
+          (click)="onSave()"
+          class="save-button">
+    <mat-icon>save</mat-icon>
+    Сохранить
+  </button>
+</div>

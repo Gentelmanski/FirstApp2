@@ -113,27 +113,28 @@ export class BaseService {
   }
 
   addNewTeacher(teacher: Teacher): Observable<Teacher> {
-    const teacherToSend = {
-      name: teacher.name,
-      surname: teacher.surname,
-      email: teacher.email,
-      phone: teacher.phone || ''
-    };
-    
-    return this.http.post<Teacher>(`${this.apiUrl}/teachers`, teacherToSend);
-  }
+  const teacherToSend = {
+    name: teacher.name,
+    surname: teacher.surname,
+    email: teacher.email,
+    phone: teacher.phone || '',
+    groups: teacher.groups || [] 
+  };
+  
+  return this.http.post<Teacher>(`${this.apiUrl}/teachers`, teacherToSend);
+}
 
   updateTeacher(teacher: Teacher): Observable<Teacher> {
-    const teacherToSend = {
-      name: teacher.name,
-      surname: teacher.surname,
-      email: teacher.email,
-      phone: teacher.phone || ''
-    };
-    
-    return this.http.put<Teacher>(`${this.apiUrl}/teachers/${teacher.id}`, teacherToSend);
-  }
-
+  const teacherToSend = {
+    name: teacher.name,
+    surname: teacher.surname,
+    email: teacher.email,
+    phone: teacher.phone || '',
+    groups: teacher.groups || [] 
+  };
+  
+  return this.http.put<Teacher>(`${this.apiUrl}/teachers/${teacher.id}`, teacherToSend);
+}
   deleteTeacher(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/teachers/${id}`);
   }
@@ -179,6 +180,10 @@ updateGroup(group: Group): Observable<Group> {
 
 deleteGroup(id: number): Observable<void> {
   return this.http.delete<void>(`${this.apiUrl}/groups/${id}`);
+}
+
+getGroupStudents(groupId: number): Observable<Student[]> {
+  return this.http.get<Student[]>(`${this.apiUrl}/groups/${groupId}/students`);
 }
 
 }

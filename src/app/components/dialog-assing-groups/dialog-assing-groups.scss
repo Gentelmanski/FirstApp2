@@ -1,0 +1,275 @@
+.dialog-content {
+  min-width: 500px;
+  max-width: 700px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0 24px;
+
+  .teacher-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background-color: #f5f7fa;
+    border-radius: 8px;
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      mat-icon {
+        color: #5d6d7e;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .teacher-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .teacher-email {
+        font-size: 14px;
+        color: #7f8c8d;
+      }
+    }
+  }
+
+  .groups-section {
+    margin: 24px 0;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px 0;
+      color: #2c3e50;
+      font-size: 18px;
+      font-weight: 600;
+
+      mat-icon {
+        color: #3498db;
+      }
+    }
+
+    .full-width-input {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .groups-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e0e6ed;
+      border-radius: 8px;
+      padding: 8px;
+
+      .group-item {
+        padding: 12px;
+        border-bottom: 1px solid #f0f4f8;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: #f8fafc;
+          border-radius: 6px;
+        }
+
+        .group-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          margin-left: 8px;
+
+          .group-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+          }
+
+          .group-code {
+            color: #7f8c8d;
+            font-size: 12px;
+            background-color: #f0f4f8;
+            padding: 2px 8px;
+            border-radius: 12px;
+            align-self: flex-start;
+          }
+
+          .group-stats {
+            color: #95a5a6;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+        }
+
+        .mat-mdc-checkbox {
+          width: 100%;
+        }
+      }
+
+      .no-groups {
+        text-align: center;
+        padding: 40px 20px;
+        color: #95a5a6;
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          margin-bottom: 16px;
+          opacity: 0.5;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .selected-groups-section {
+    margin: 24px 0;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px 0;
+      color: #2c3e50;
+      font-size: 18px;
+      font-weight: 600;
+
+      mat-icon {
+        color: #4caf50;
+      }
+    }
+
+    .selected-groups {
+      min-height: 60px;
+      padding: 12px;
+      border: 1px dashed #e0e6ed;
+      border-radius: 8px;
+      background-color: #f8fafc;
+
+      .mat-mdc-chip-set {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
+  }
+}
+
+.mat-mdc-dialog-actions {
+  padding: 16px 24px;
+  gap: 8px;
+
+  .cancel-button {
+    color: #7f8c8d;
+
+    &:hover {
+      background-color: rgba(127, 140, 141, 0.1);
+    }
+  }
+
+  .save-button {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    font-weight: 500;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:not(:disabled):hover {
+      background: linear-gradient(135deg, #2980b9, #1c6ea4);
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .dialog-content {
+    min-width: auto;
+    padding: 0 16px;
+  }
+}
+
+// Стили для столбца групп в таблице преподавателей
+.groups-cell {
+  .groups-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .group-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      flex: 1;
+
+      .group-tag {
+        background-color: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+        border: 1px solid rgba(243, 156, 18, 0.2);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: rgba(243, 156, 18, 0.2);
+          transform: translateY(-1px);
+        }
+      }
+    }
+
+    .no-groups {
+      color: #95a5a6;
+      font-style: italic;
+      flex: 1;
+    }
+
+    .assign-groups-btn {
+      width: 32px;
+      height: 32px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &:hover {
+      .assign-groups-btn {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// Обновить стили для таблицы преподавателей
+.teachers-table {
+  .mat-row:hover {
+    .groups-cell {
+      .assign-groups-btn {
+        opacity: 1;
+      }
+    }
+  }
+}

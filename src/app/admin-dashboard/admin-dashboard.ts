@@ -22,6 +22,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { RouterModule } from '@angular/router';
 import { Group } from '../models/groups';
 import { DialogEditWrapperGroup } from '../components/dialog-edit-wrapper-group/dialog-edit-wrapper-group';
+import { DialogAssignGroups } from '../components/dialog-assing-groups/dialog-assing-groups';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -58,7 +59,7 @@ export class AdminDashboard implements AfterViewInit, OnInit, OnDestroy {
   studentsError: string | null = null;
 
   // Для преподавателей
-  teachersDisplayedColumns: string[] = ['position', 'name', 'surname', 'email', 'phone', 'actions'];
+  teachersDisplayedColumns: string[] = ['position', 'name', 'surname', 'email', 'phone', 'groups', 'actions'];
   teachersDataSource = new MatTableDataSource<Teacher>();
   teachersTotalItems = 0;
   teachersPageSize = 5;
@@ -642,6 +643,42 @@ private clearGroupsTableData(): void {
   if (this.groupsPaginator) {
     this.groupsPaginator.firstPage();
   }
+}
+
+// Метод для назначения групп преподавателю
+assignGroupsToTeacher(teacher: Teacher) {
+  const dialogAssignGroups = this.dialog.open(DialogAssignGroups, {
+    width: '600px',
+    maxHeight: '80vh',
+    data: { teacher }
+  });
+
+  dialogAssignGroups.afterClosed()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((updatedTeacher: Teacher) => {
+      if (updatedTeacher && updatedTeacher.id) {
+        this.isLoadingTeachers = true;
+        
+        // Создаем объект для обновления с группами
+        const teacherToUpdate = {
+          ...updatedTeacher,
+          groups: updatedTeacher.groups || []
+        };
+
+        this.baseService.updateTeacher(teacherToUpdate)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.showSuccess('Группы успешно назначены преподавателю');
+              this.loadTeachers();
+            },
+            error: (error) => {
+              this.isLoadingTeachers = false;
+              this.showError(error.error?.error || 'Ошибка назначения групп преподавателю');
+            }
+          });
+      }
+    });
 }
 
 }
