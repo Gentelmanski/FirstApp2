@@ -54,6 +54,16 @@
           </button>
           <mat-icon matSuffix *ngIf="!searchStudentEmail">search</mat-icon>
         </mat-form-field>
+<!-- ПОиск по группев -->
+        <!-- <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Поиск по группе</mat-label>
+        <input matInput [(ngModel)]="searchStudentGroup" (ngModelChange)="onStudentsSearchChange()" 
+              placeholder="Введите название или код группы...">
+        <button mat-icon-button matSuffix *ngIf="searchStudentGroup" (click)="clearStudentsSearch('group')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon matSuffix *ngIf="!searchStudentGroup">school</mat-icon>
+      </mat-form-field> -->
 
         <button mat-button color="warn" (click)="clearAllStudentsSearch()" 
                 [disabled]="!searchStudentName && !searchStudentSurname && !searchStudentEmail">
@@ -111,6 +121,18 @@
               {{ element.email || '—' }}
             </td>
           </ng-container>
+
+          <!-- Группа -->
+              <ng-container matColumnDef="group">
+      <th mat-header-cell *matHeaderCellDef> Группа </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="group-info" *ngIf="element.group">
+          <span class="group-name">{{ element.group.name }}</span>
+          <span class="group-code">({{ element.group.code }})</span>
+        </div>
+        <span *ngIf="!element.group" class="no-group">—</span>
+      </td>
+    </ng-container>
 
           <!-- Действия -->
           <ng-container matColumnDef="actions">

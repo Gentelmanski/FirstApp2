@@ -5,7 +5,7 @@
 
 <div mat-dialog-content class="dialog-content">
   <mat-form-field appearance="outline" class="full-width-input">
-    <mat-label>Имя студента</mat-label>
+    <mat-label>Имя</mat-label>
     <input matInput
            type="text"
            [(ngModel)]="editingStudent.name"
@@ -15,22 +15,42 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width-input">
-    <mat-label>Фамилия студента</mat-label>
+    <mat-label>Фамилия</mat-label>
     <input matInput
            type="text"
            [(ngModel)]="editingStudent.surname"
            required
            placeholder="Введите фамилию">
-    <mat-icon matSuffix>badge</mat-icon>
+    <mat-icon matSuffix>person</mat-icon>
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width-input">
-    <mat-label>Email студента</mat-label>
+    <mat-label>Email</mat-label>
     <input matInput
            type="email"
            [(ngModel)]="editingStudent.email"
+           required
            placeholder="Введите email">
     <mat-icon matSuffix>email</mat-icon>
+  </mat-form-field>
+
+  <!-- Выбор группы -->
+  <mat-form-field appearance="outline" class="full-width-input" *ngIf="isAdmin">
+    <mat-label>Группа</mat-label>
+    <mat-select [(ngModel)]="editingStudent.group_id" name="group">
+      <mat-option [value]="null">Без группы</mat-option>
+      <mat-option *ngFor="let group of allGroups" [value]="group.id">
+        {{group.name}} ({{group.code}})
+      </mat-option>
+    </mat-select>
+    <mat-icon matSuffix>school</mat-icon>
+  </mat-form-field>
+
+  <!-- Отображение группы (только для просмотра, если не админ) -->
+  <mat-form-field appearance="outline" class="full-width-input" *ngIf="!isAdmin && editingStudent.group">
+    <mat-label>Группа</mat-label>
+    <input matInput [value]="editingStudent.group?.name + ' (' + editingStudent.group?.code + ')'" readonly>
+    <mat-icon matSuffix>school</mat-icon>
   </mat-form-field>
 </div>
 
@@ -44,7 +64,7 @@
 
   <button mat-button="filled"
           color="primary"
-          [disabled]="!editingStudent.name || !editingStudent.surname"
+          [disabled]="!editingStudent.name || !editingStudent.surname || !editingStudent.email"
           [mat-dialog-close]="editingStudent"
           class="submit-button">
     <mat-icon>{{ editingStudent.id ? 'save' : 'add' }}</mat-icon>

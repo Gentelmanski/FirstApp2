@@ -66,7 +66,8 @@ export class BaseService {
     const studentToSend = {
       name: student.name,
       surname: student.surname,
-      email: student.email || ''
+      email: student.email || '',
+      group_id: student.group_id || null
     };
     
     return this.http.post<Student>(`${this.apiUrl}/students`, studentToSend);
@@ -76,7 +77,8 @@ export class BaseService {
     const studentToSend = {
       name: student.name,
       surname: student.surname,
-      email: student.email || ''
+      email: student.email || '',
+       group_id: student.group_id || null
     };
     
     return this.http.put<Student>(`${this.apiUrl}/students/${student.id}`, studentToSend);
@@ -185,5 +187,14 @@ deleteGroup(id: number): Observable<void> {
 getGroupStudents(groupId: number): Observable<Student[]> {
   return this.http.get<Student[]>(`${this.apiUrl}/groups/${groupId}/students`);
 }
+
+getAllGroups(): Observable<Group[]> {
+  return this.http.get<Group[]>(`${this.apiUrl}/groups/all`);
+}
+
+getAllGroupsPaginated(): Observable<PaginatedResponse<Group>> {
+  return this.http.get<PaginatedResponse<Group>>(`${this.apiUrl}/groups?page=1&limit=1000`);
+}
+
 
 }

@@ -46,7 +46,7 @@ import { DialogAssignGroups } from '../components/dialog-assing-groups/dialog-as
 })
 export class AdminDashboard implements AfterViewInit, OnInit, OnDestroy {
   // Для студентов
-  studentsDisplayedColumns: string[] = ['position', 'name', 'surname', 'email', 'actions'];
+  studentsDisplayedColumns: string[] = ['position', 'name', 'surname', 'email', 'group', 'actions'];
   studentsDataSource = new MatTableDataSource<Student>();
   studentsTotalItems = 0;
   studentsPageSize = 5;
